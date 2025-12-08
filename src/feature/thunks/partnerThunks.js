@@ -1,0 +1,103 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { backendurl } from "../urldata";
+import { getAuthData } from "../../utils/localStorage";
+
+export const fetchPartnerProfile = createAsyncThunk(
+  "partner/fetchProfile",
+  async (_,{ rejectWithValue }) => {
+    const { partnerToken } = getAuthData();
+    try {
+      const response = await axios.get(`${backendurl}/partner/profile`, {
+        headers: {
+          Authorization: `Bearer ${partnerToken}`,
+        },
+      });
+   
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch Partner profile"
+      );
+    }
+  }
+);
+
+export const updatePartnerProfile = createAsyncThunk(
+  "partner/updateProfile",
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const { partnerToken } = getAuthData();
+      const res = await axios.patch(
+        `${backendurl}/partner/profile/update`,
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${partnerToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return res.data.profile;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// Fetch Partner Dashboard
+export const fetchPartnerDashboard = createAsyncThunk(
+  "partner/fetchDashboard",
+  async ({ year, month, start, end } = {}, { rejectWithValue }) => {
+    try {
+      const { partnerToken } = getAuthData();
+
+      // Build query params dynamically
+      const params = {};
+      if (year && month) {
+        params.year = year;
+        params.month = month;
+      } else if (start && end) {
+        params.start = start;
+        params.end = end;
+      }
+
+      const res = await axios.get(`${backendurl}/partner/dashboard`, {
+        headers: {
+          Authorization: `Bearer ${partnerToken}`,
+        },
+        params, // pass filters to backend
+      });
+
+      return res.data; // full dashboard response
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+
+
+// Partner Signup Thunk
+export const signupPartner = createAsyncThunk(
+  "partner/signup",
+  async ( formDataToSend , { rejectWithValue }) => {
+
+ 
+    
+
+    try {
+      const res = await axios.post(`${backendurl}/partner/signup-partner`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return res.data; // response from backend
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+ 

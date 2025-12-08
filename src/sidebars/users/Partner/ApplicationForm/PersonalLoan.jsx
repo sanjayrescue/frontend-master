@@ -1,0 +1,2372 @@
+import React, { useState } from "react";
+import {
+  User,
+  Phone,
+  Mail,
+  Calendar,
+  MapPin,
+  FileText,
+  Building,
+  Briefcase,
+  Users,
+  Home,
+  X,
+} from "lucide-react";
+
+import axios from "axios";
+
+import { getAuthData } from "../../../../utils/localStorage";
+import { backendurl } from "../../../../feature/urldata";
+import Modal from "../../../../components/Modal";
+
+export default function PersonalLoan() {
+  const [documentModel, setdocumentModel] = useState(null);
+
+  const defaultReferralCode = 'PT-D4CTD8B2'
+  const { partnerToken } = getAuthData();
+  const isPartnerLoggedIn = Boolean(partnerToken);
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    officialEmail: "",
+    stabilityOfResidency: "",
+    currentHouseStatus: "",
+    currentLandmark: "",
+    permanentHouseStatus: "",
+    permanentLandmark: "",
+    permanentStability: "",
+    currentAddressPinCode: "",
+    permanentAddressPinCode: "",
+    maritalStatus: "",
+    wifeName: "",
+    motherName: "",
+    companyIdCard: "",
+    selfie: "",
+    contactNo: "",
+    email: "",
+    dob: "",
+    pan: "",
+    currentAddress: "",
+    permanentAddress: "",
+    addressProofType: "",
+    addressProof: "",
+    utilityBill: "",
+    rentAgreement: "",
+    aadhar: "",
+    companyName: "",
+    designation: "",
+    companyAddress: "",
+    monthlySalary: "",
+    totalExperience: "",
+    currentExperience: "",
+    salarySlip: "",
+    bankStatement: "",
+    photoCopy: "",
+    propertyType: "",
+    reference1Name: "",
+    reference1Contact: "",
+    reference2Name: "",
+    reference2Contact: "",
+    loanAmount: "",
+
+    // New property documents
+    allotmentLetter: "",
+    newPropertyPaymentReceipts: "",
+
+    // Resale property documents
+    titleDeeds: "",
+    resalePaymentReceipts: "",
+    agreementCopy: "",
+    aadharFront: "",
+    aadharBack: "",
+    panCard: "",
+    passportPhoto: "",
+    salarySlip1: "",
+    salarySlip2: "",
+    salarySlip3: "",
+    salaryInHand: "",
+    bankStatement1: "",
+    bankStatement2: "",
+    bankStatement3: "",
+
+    // New address proofs
+    newAddressProofs: "",
+
+    password: "",
+    confirmPassword: "",
+    partnerReferralCode: "",
+  });
+
+  const [sameAddress, setSameAddress] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [applicationId, setApplicationId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "loanAmount" ? parseInt(value, 10) || 0 : value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (name.startsWith("newAddressProofs.")) {
+      const proofType = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        newAddressProofs: {
+          ...prev.newAddressProofs,
+          [proofType]: files[0],
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
+  };
+
+  const handleFileChangeAddressProofs = (e) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0], // now this updates newAddressProofs
+      }));
+    }
+  };
+
+  const handleFileRemove = (fieldName) => {
+    if (fieldName.startsWith("newAddressProofs.")) {
+      const proofType = fieldName.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        newAddressProofs: {
+          ...prev.newAddressProofs,
+          [proofType]: null,
+        },
+      }));
+      const fileInput = document.querySelector(
+        `input[name="newAddressProofs.${proofType}"]`
+      );
+      if (fileInput) fileInput.value = "";
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [fieldName]: null,
+      }));
+      const fileInput = document.querySelector(`input[name="${fieldName}"]`);
+      if (fileInput) fileInput.value = "";
+    }
+  };
+
+  const handleSameAddressChange = (e) => {
+    setSameAddress(e.target.checked);
+    if (e.target.checked) {
+      setFormData((prev) => ({
+        ...prev,
+        permanentAddress: prev.currentAddress,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        permanentAddress: "",
+      }));
+    }
+  };
+
+  function validateRegistrationForm(formData) {
+    const errors = [];
+
+    // Personal fields
+    if (!formData.firstName) errors.push("First name is required.");
+    if (!formData.lastName) errors.push("Last name is required.");
+    if (!formData.motherName) errors.push("Mother's name is required.");
+    if (!formData.pan) errors.push("PAN number is required.");
+    if (!formData.gender) errors.push("Gender is required.");
+    if (!formData.maritalStatus) errors.push("Marital status is required.");
+    if (!formData.password) errors.push("Password is required.");
+    if (!formData.confirmPassword) errors.push("Confirm Password is required.");
+    if (
+      formData.password &&
+      formData.confirmPassword &&
+      formData.password !== formData.confirmPassword
+    ) {
+      errors.push("Passwords do not match.");
+    }
+
+    // Contact info
+    if (!formData.contactNo) {
+      errors.push("Contact number is required.");
+    } else if (!/^\d{10}$/.test(formData.contactNo)) {
+      errors.push("Contact number must be exactly 10 digits.");
+    }
+
+    if (!formData.email) {
+      errors.push("Email is required.");
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      errors.push("Invalid email format.");
+    }
+
+    if (!formData.dob) {
+      errors.push("Date of Birth is required.");
+    } else if (getAgeFromDOB(formData.dob) < 18) {
+      errors.push("You must be at least 18 years old to proceed.");
+    }
+
+    // Address
+    if (!formData.currentAddress) errors.push("Current address is required.");
+    if (!formData.permanentAddress)
+      errors.push("Permanent address is required.");
+
+    // Employment
+    if (!formData.companyName) errors.push("Company name is required.");
+    if (!formData.designation) errors.push("Designation is required.");
+    if (!formData.companyAddress) errors.push("Company address is required.");
+    if (!formData.monthlySalary) errors.push("Monthly salary is required.");
+
+    // References
+    if (!formData.reference1Name) errors.push("Reference 1 name is required.");
+    if (!formData.reference1Contact) {
+      errors.push("Reference 1 contact is required.");
+    } else if (!/^\d{10}$/.test(formData.reference1Contact)) {
+      errors.push("Reference 1 contact must be exactly 10 digits.");
+    }
+
+    if (!formData.reference2Name) errors.push("Reference 2 name is required.");
+    if (!formData.reference2Contact) {
+      errors.push("Reference 2 contact is required.");
+    } else if (!/^\d{10}$/.test(formData.reference2Contact)) {
+      errors.push("Reference 2 contact must be exactly 10 digits.");
+    }
+
+    return errors;
+  }
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const errors = validateRegistrationForm(formData);
+      if (errors.length > 0) {
+        alert(errors.join("\n")); // show all errors at once
+        return;
+      }
+
+      // ✅ Prepare JSON structure
+      const applicationData = {
+        loanType: "PERSONAL",
+        partnerReferralCode: isPartnerLoggedIn
+          ? undefined
+          : formData.partnerReferralCode?.trim() || undefined,
+        customer: {
+          firstName: formData.firstName,
+          middleName: formData.middleName,
+          lastName: formData.lastName || formData.surname,
+          email: formData.email,
+          officialEmail: formData.officialEmail,
+          phone: formData.contactNo,
+          mothersName: formData.motherName,
+          panNumber: formData.pan,
+          dateOfBirth: formData.dob,
+          gender: formData.gender,
+          maritalStatus: formData.maritalStatus,
+          spouseName: formData.wifeName,
+          currentAddress: formData.currentAddress,
+          currentAddressLandmark: formData.currentLandmark,
+          currentAddressPinCode: formData.currentAddressPinCode,
+          currentAddressHouseStatus: formData.currentHouseStatus,
+          permanentAddress: formData.permanentAddress,
+          permanentAddressLandmark: formData.permanentLandmark,
+          permanentAddressPinCode: formData.permanentAddressPinCode,
+          permanentAddressHouseStatus: formData.permanentHouseStatus,
+          stabilityOfResidency: formData.stabilityOfResidency,
+          permanentAddressStability: formData.permanentStability,
+          loanAmount: formData.loanAmount || 0,
+          password: formData.password,
+        },
+        product: {
+          companyName: formData.companyName,
+          designation: formData.designation,
+          companyAddress: formData.companyAddress,
+          monthlySalary: formData.monthlySalary,
+          totalExperience: formData.totalExperience,
+          currentExperience: formData.currentExperience,
+          salaryInHand: formData.salaryInHand,
+        },
+        references: [
+          { name: formData.reference1Name, phone: formData.reference1Contact },
+          { name: formData.reference2Name, phone: formData.reference2Contact },
+        ],
+        docs: [], // files will be appended separately
+        propertyType: formData.propertyType,
+      };
+
+      // ✅ Prepare FormData
+      const formDataToSend = new FormData();
+      formDataToSend.append("data", JSON.stringify(applicationData));
+
+      // Append files
+      const docsQueue = [
+        { file: formData.aadharFront, type: "AADHAR_FRONT" },
+        { file: formData.aadharBack, type: "AADHAR_BACK" },
+        { file: formData.panCard, type: "PAN" },
+        { file: formData.passportPhoto, type: "PHOTO" },
+        { file: formData.selfie, type: "SELFIE" },
+        { file: formData.addressProof, type: "ADDRESS_PROOF" },
+        {
+          file: formData.utilityBill || formData.rentAgreement,
+          type: "OTHER_DOCS",
+        },
+        { file: formData.salarySlip1, type: "SALARY_SLIP_1" },
+        { file: formData.salarySlip2, type: "SALARY_SLIP_2" },
+        { file: formData.salarySlip3, type: "SALARY_SLIP_3" },
+        { file: formData.bankStatement1, type: "BANK_STATEMENT" },
+        { file: formData.allotmentLetter, type: "ALLOTMENT_LETTER" },
+        {
+          file: formData.newPropertyPaymentReceipts,
+          type: "NEW_PROPERTY_PAYMENT_RECEIPTS",
+        },
+        { file: formData.titleDeeds, type: "TITLE_DEEDS" },
+        {
+          file: formData.resalePaymentReceipts,
+          type: "RESALE_PAYMENT_RECEIPTS",
+        },
+        { file: formData.agreementCopy, type: "AGREEMENT_COPY" },
+      ];
+
+      docsQueue.forEach(({ file, type }) => {
+        if (file) {
+          formDataToSend.append("docs", file);
+          formDataToSend.append("docTypes", type);
+        }
+      });
+
+      if (!checkFileSize(docsQueue)) {
+        return;
+      }
+
+      // ✅ Send FormData to backend
+      const endpoint = isPartnerLoggedIn
+        ? `${backendurl}/partner/create-applications`
+        : `${backendurl}/partner/public/create-application`;
+
+      const headers = isPartnerLoggedIn
+        ? {
+            Authorization: `Bearer ${partnerToken}`,
+            "Content-Type": "multipart/form-data",
+          }
+        : {
+            "Content-Type": "multipart/form-data",
+          };
+
+      const response = await axios.post(endpoint, formDataToSend, {
+        headers,
+      });
+
+      const data = response.data;
+      setApplicationId(data.id);
+      setModalOpen(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApplyNow = async () => {
+    if (!applicationId) return;
+    setLoading(true);
+    setError("");
+    try {
+      const { partnerToken } = getAuthData();
+      if (!partnerToken) {
+        // No login -> treat as already submitted
+        setModalOpen(false);
+        return;
+      }
+      await axios.post(
+        `${backendurl}/partner/applications/${applicationId}/submit`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${partnerToken}`,
+          },
+        }
+      );
+      setModalOpen(false);
+      alert("Application submitted successfully!");
+      resetFields();
+    } catch (err) {
+      setError(
+        err.response?.data?.message || err.message || "Something went wrong."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function getAgeFromDOB(dobString) {
+    if (!dobString) return null; // handle empty or invalid input
+
+    const dob = new Date(dobString);
+    if (isNaN(dob)) return null; // handle invalid date format
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const dayDiff = today.getDate() - dob.getDate();
+
+    // If birthday hasn't occurred yet this year, subtract one
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+
+  const resetFields = () => {
+    setFormData({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      gender: "",
+      officialEmail: "",
+      stabilityOfResidency: "",
+      currentHouseStatus: "",
+      currentLandmark: "",
+      permanentHouseStatus: "",
+      permanentLandmark: "",
+      permanentStability: "",
+      currentAddressPinCode: "",
+      permanentAddressPinCode: "",
+      maritalStatus: "",
+      wifeName: "",
+      motherName: "",
+      companyIdCard: "",
+      selfie: "",
+      contactNo: "",
+      email: "",
+      dob: "",
+      pan: "",
+      currentAddress: "",
+      permanentAddress: "",
+      addressProofType: "",
+      addressProof: "",
+      utilityBill: "",
+      rentAgreement: "",
+      aadhar: "",
+      companyName: "",
+      designation: "",
+      companyAddress: "",
+      monthlySalary: "",
+      totalExperience: "",
+      currentExperience: "",
+      salarySlip: "",
+      bankStatement: "",
+      photoCopy: "",
+      propertyType: "",
+      reference1Name: "",
+      reference1Contact: "",
+      reference2Name: "",
+      reference2Contact: "",
+      loanAmount: "",
+
+      // New property documents
+      allotmentLetter: "",
+      newPropertyPaymentReceipts: "",
+
+      // Resale property documents
+      titleDeeds: "",
+      resalePaymentReceipts: "",
+      agreementCopy: "",
+      aadharFront: "",
+      aadharBack: "",
+      panCard: "",
+      salarySlip1: "",
+      salarySlip2: "",
+      salarySlip3: "",
+      salaryInHand: "",
+      bankStatement1: "",
+      bankStatement2: "",
+      bankStatement3: "",
+
+      // New address proofs
+      newAddressProofs: "",
+
+      password: "",
+      confirmPassword: "",
+    });
+  };
+
+  const checkFileSize = (files) => {
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+
+    for (let fileObj of files) {
+      if (fileObj?.file && fileObj.file.size > maxSize) {
+        const type = fileObj.type;
+        alert(`${type} file is too large. Maximum allowed size is 2MB.`);
+        return false; // Return the type of the file that exceeded size
+      }
+    }
+
+    return true; // All files are valid
+  };
+
+  return (
+    <>
+      {documentModel && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full relative p-4">
+            {/* Close Button */}
+            <button
+              onClick={() => setdocumentModel(null)}
+              className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+            >
+              Close
+            </button>
+
+            {/* Preview Image or PDF */}
+            {documentModel.endsWith(".pdf") ? (
+              <iframe
+                src={documentModel}
+                title="Document Preview"
+                className="w-full h-[500px] rounded-lg"
+              />
+            ) : (
+              <img
+                src={documentModel}
+                alt="Document Preview"
+                className="w-full h-auto rounded-lg object-contain"
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      <div
+        className="min-h-screen py-8 px-0 sm:px-4"
+        style={{ backgroundColor: "#F8FAFC" }}
+      >
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div
+              className="px-8 py-6 text-white"
+              style={{ backgroundColor: "#12B99C" }}
+            >
+              <h1 className="text-3xl font-bold text-center">
+                Personal Loan Application
+              </h1>
+              <p className="text-center mt-2 opacity-90">
+                Complete all fields to process your loan application
+              </p>
+            </div>
+
+            <div className="p-8 space-y-8">
+              {/* Personal Information */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <User className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Personal Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* name */}
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your first name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Middle Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="middleName"
+                      value={formData.middleName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your middle name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your last name"
+                      required
+                    />
+                  </div>
+                  {/* name end */}
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Contact Number *
+                    </label>
+                    <div className="relative">
+                      <Phone
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                        style={{ color: "#12B99C" }}
+                      />
+                      <input
+                        type="tel"
+                        name="contactNo"
+                        value={formData.contactNo}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        placeholder="Enter your contact number"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Email ID *
+                    </label>
+                    <div className="relative">
+                      <Mail
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                        style={{ color: "#12B99C" }}
+                      />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      PAN NO *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="pan"
+                        value={formData.pan}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        placeholder="Enter pan number"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Date of Birth *
+                    </label>
+                    <div className="relative">
+                      <Calendar
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                        style={{ color: "#12B99C" }}
+                      />
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Gender *
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      required
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Official Email (Company)
+                    </label>
+                    <input
+                      type="email"
+                      name="officialEmail"
+                      value={formData.officialEmail}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your official email"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Marital Status *
+                    </label>
+                    <select
+                      name="maritalStatus"
+                      value={formData.maritalStatus}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      required
+                    >
+                      <option value="">Select status</option>
+                      <option value="single">Single</option>
+                      <option value="married">Married</option>
+                    </select>
+                  </div>
+                  {formData.maritalStatus === "married" && (
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: "#111827" }}
+                      >
+                        Spouse Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="wifeName"
+                        value={formData.wifeName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        placeholder="Enter spouse name"
+                        required
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Mother Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="motherName"
+                      value={formData.motherName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter mother name"
+                      required
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Address Information */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <MapPin className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Address Information
+                </h2>
+                <div className="space-y-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Current Address *
+                    </label>
+                    <textarea
+                      name="currentAddress"
+                      value={formData.currentAddress}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors resize-none"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      rows="3"
+                      placeholder="Enter your current address"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap -mx-2">
+                    {/* Left Column */}
+                    <div className="w-full md:w-1/2 px-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Stability of Residency *
+                        </label>
+                        <input
+                          type="text"
+                          name="stabilityOfResidency"
+                          value={formData.stabilityOfResidency}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter stability of residency"
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Current House Status (Rented/Own) *
+                        </label>
+                        <select
+                          name="currentHouseStatus"
+                          value={formData.currentHouseStatus}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          required
+                        >
+                          <option value="">Select status</option>
+                          <option value="rented">Rented</option>
+                          <option value="own">Own</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="w-full md:w-1/2 px-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Landmark (Current Address) *
+                        </label>
+                        <input
+                          type="text"
+                          name="currentLandmark"
+                          value={formData.currentLandmark}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter landmark for current address"
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Pin code *
+                        </label>
+                        <input
+                          type="number"
+                          name="currentAddressPinCode"
+                          value={formData.currentAddressPinCode}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter pin code"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="sameAddress"
+                      checked={sameAddress}
+                      onChange={handleSameAddressChange}
+                      className="w-5 h-5 rounded"
+                      style={{ accentColor: "#12B99C" }}
+                    />
+                    <label
+                      htmlFor="sameAddress"
+                      className="text-sm font-medium"
+                      style={{ color: "#111827" }}
+                    >
+                      Permanent address is same as current address
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Permanent Address *
+                    </label>
+                    <textarea
+                      name="permanentAddress"
+                      value={formData.permanentAddress}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors resize-none"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      rows="3"
+                      placeholder="Enter your permanent address"
+                      disabled={sameAddress}
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap -mx-2">
+                    {/* Left Column */}
+                    <div className="w-full md:w-1/2 px-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Permanent House Status (Rented/Own) *
+                        </label>
+                        <select
+                          name="permanentHouseStatus"
+                          value={formData.permanentHouseStatus}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          required
+                        >
+                          <option value="">Select status</option>
+                          <option value="rented">Rented</option>
+                          <option value="own">Own</option>
+                        </select>
+                      </div>
+
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Landmark (Permanent Address) *
+                        </label>
+                        <input
+                          type="text"
+                          name="permanentLandmark"
+                          value={formData.permanentLandmark}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter landmark for permanent address"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="w-full md:w-1/2 px-2">
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Stability (Permanent Address) *
+                        </label>
+                        <input
+                          type="text"
+                          name="permanentStability"
+                          value={formData.permanentStability}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter stability for permanent address"
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Pin code *
+                        </label>
+                        <input
+                          type="number"
+                          name="permanentAddressPinCode"
+                          value={formData?.permanentAddressPinCode}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          placeholder="Enter pin code"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <FileText className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Loan Amount Details
+                </h2>
+                <div className="space-y-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Requested Loan Amount (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      name="loanAmount"
+                      value={formData?.loanAmount ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          loanAmount: val === "" ? "" : parseInt(val, 10), // ensures integer
+                        }));
+                      }}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter loan amount"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Document Upload */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <FileText className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Document Upload
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    {
+                      name: "aadharFront",
+                      label: "Aadhar Card (Front) *",
+                      required: true,
+                    },
+                    {
+                      name: "aadharBack",
+                      label: "Aadhar Card (Back) *",
+                      required: true,
+                    },
+                    { name: "panCard", label: "PAN Card *", required: true },
+                    {
+                      name: "passportPhoto",
+                      label: "Passport Photo *",
+                      required: true,
+                      accept: ".jpg,.jpeg,.png",
+                    },
+                    {
+                      name: "otherDocument",
+                      label: "Other Document",
+                      required: false,
+                    },
+                  ].map((doc, index) => (
+                    <div key={index}>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: "#111827" }}
+                      >
+                        {doc.label}
+                      </label>
+                      <div className="relative flex items-center gap-2">
+                        {/* File Input */}
+                        <input
+                          type="file"
+                          name={doc.name}
+                          onChange={handleFileChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "#F8FAFC",
+                          }}
+                          accept={doc.accept || ".pdf,.jpg,.jpeg,.png"}
+                          required={doc.required}
+                        />
+
+                        {/* View Button */}
+                        {formData[doc.name] && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData[doc.name].preview
+                                  ? formData[doc.name].preview
+                                  : formData[doc.name] instanceof File
+                                  ? URL.createObjectURL(formData[doc.name])
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+                        )}
+
+                        {/* Remove Button */}
+                        {formData[doc.name] && (
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove(doc.name)}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* File Name */}
+                      {formData[doc.name] && (
+                        <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                          <span>✓</span> {formData[doc.name].name}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Employment Information */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <Building className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Employment Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your company name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Designation *
+                    </label>
+                    <input
+                      type="text"
+                      name="designation"
+                      value={formData.designation}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your designation"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Company Address *
+                    </label>
+                    <textarea
+                      name="companyAddress"
+                      value={formData.companyAddress}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors resize-none"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      rows="2"
+                      placeholder="Enter your company address"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Monthly Salary (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      name="monthlySalary"
+                      value={formData.monthlySalary}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your monthly salary"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Total Experience (in years) *
+                    </label>
+                    <div className="relative">
+                      <Briefcase
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                        style={{ color: "#12B99C" }}
+                      />
+                      <input
+                        type="number"
+                        name="totalExperience"
+                        value={formData.totalExperience}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        placeholder="0"
+                        min="0"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Current Experience (in years) *
+                    </label>
+                    <input
+                      type="number"
+                      name="currentExperience"
+                      value={formData.currentExperience}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="0"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Salary in Hand (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      name="salaryInHand"
+                      value={formData.salaryInHand}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter your salary in hand"
+                      min="0"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Company ID Card *
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="companyIdCard"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.companyIdCard && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.companyIdCard.preview
+                                  ? formData.companyIdCard.preview
+                                  : formData.companyIdCard instanceof File
+                                  ? URL.createObjectURL(formData.companyIdCard)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("companyIdCard")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.companyIdCard && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.companyIdCard.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Salary Slip 1 *
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="salarySlip1"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.salarySlip1 && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.salarySlip1.preview
+                                  ? formData.salarySlip1.preview
+                                  : formData.salarySlip1 instanceof File
+                                  ? URL.createObjectURL(formData.salarySlip1)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("salarySlip1")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.salarySlip1 && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.salarySlip1.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Salary Slip 2 *
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="salarySlip2"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.salarySlip2 && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.salarySlip2.preview
+                                  ? formData.salarySlip2.preview
+                                  : formData.salarySlip2 instanceof File
+                                  ? URL.createObjectURL(formData.salarySlip2)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("salarySlip2")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.salarySlip2 && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.salarySlip2.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Salary Slip 3 *
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="salarySlip3"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.salarySlip3 && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.salarySlip3.preview
+                                  ? formData.salarySlip3.preview
+                                  : formData.salarySlip3 instanceof File
+                                  ? URL.createObjectURL(formData.salarySlip3)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("salarySlip3")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.salarySlip3 && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.salarySlip3.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Form 16 / 26AS
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="form16_26as"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.form16_26as && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.form16_26as.preview
+                                  ? formData.form16_26as.preview
+                                  : formData.form16_26as instanceof File
+                                  ? URL.createObjectURL(formData.form16_26as)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("form16_26as")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.form16_26as && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.form16_26as.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Bank Details Section */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <FileText className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Bank Details
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Bank Statement 1 *
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="bankStatement1"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.bankStatement1 && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.bankStatement1.preview
+                                  ? formData.bankStatement1.preview
+                                  : formData.bankStatement1 instanceof File
+                                  ? URL.createObjectURL(formData.bankStatement1)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("bankStatement1")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.bankStatement1 && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.bankStatement1.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Bank Statement 2
+                    </label>
+                    <div className="relative flex items-center gap-2">
+                      {/* File Input */}
+                      <input
+                        type="file"
+                        name="bankStatement2"
+                        onChange={handleFileChange}
+                        className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium"
+                        style={{
+                          borderColor: "#12B99C",
+                          backgroundColor: "#F8FAFC",
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+
+                      {/* Action Buttons */}
+                      {formData.bankStatement2 && (
+                        <div className="flex items-center gap-1">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setdocumentModel(
+                                formData.bankStatement2.preview
+                                  ? formData.bankStatement2.preview
+                                  : formData.bankStatement2 instanceof File
+                                  ? URL.createObjectURL(formData.bankStatement2)
+                                  : ""
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                            style={{ color: "#2563EB" }}
+                            title="View file"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileRemove("bankStatement2")}
+                            className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                            style={{ color: "#EF4444" }}
+                            title="Remove file"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Name */}
+                    {formData.bankStatement2 && (
+                      <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
+                        <span>✓</span> {formData.bankStatement2.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-gray-900">
+                  <FileText className="w-6 h-6 text-teal-500" />
+                  New Address Proof
+                </h2>
+
+                <label className="block text-sm font-medium mb-2 text-gray-900">
+                  Select one document to submit as address proof (e.g.,
+                  Lightbill, Wifi, Water, Gas Bill, or Rent Agreement)
+                </label>
+
+                <input
+                  type="file"
+                  name="addressProof" // <--- store in newAddressProofs
+                  onChange={handleFileChangeAddressProofs}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-teal-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-teal-500 file:text-white hover:file:bg-teal-600"
+                />
+
+                {formData.newAddressProofs && (
+                  <div className="mt-2 text-sm text-gray-700">
+                    {formData.newAddressProofs.type.includes("image") ? (
+                      <img
+                        src={URL.createObjectURL(formData.newAddressProofs)}
+                        alt="New Address Proof"
+                        className="w-40 h-40 object-cover rounded-lg border mt-2"
+                      />
+                    ) : (
+                      <p>📄 {formData.newAddressProofs.name}</p>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              {/* References */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <Users className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  References
+                </h2>
+                <div className="space-y-6">
+                  <div
+                    className="p-6 rounded-lg border-2"
+                    style={{
+                      borderColor: "#12B99C",
+                      backgroundColor: "#F8FAFC",
+                    }}
+                  >
+                    <h3
+                      className="text-lg font-semibold mb-4"
+                      style={{ color: "#F59E0B" }}
+                    >
+                      Reference 1
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="reference1Name"
+                          value={formData.reference1Name}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "white",
+                          }}
+                          placeholder="Enter reference name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Contact Number *
+                        </label>
+                        <input
+                          type="tel"
+                          name="reference1Contact"
+                          value={formData.reference1Contact}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "white",
+                          }}
+                          placeholder="Enter contact number"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="p-6 rounded-lg border-2"
+                    style={{
+                      borderColor: "#12B99C",
+                      backgroundColor: "#F8FAFC",
+                    }}
+                  >
+                    <h3
+                      className="text-lg font-semibold mb-4"
+                      style={{ color: "#F59E0B" }}
+                    >
+                      Reference 2
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="reference2Name"
+                          value={formData.reference2Name}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "white",
+                          }}
+                          placeholder="Enter reference name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: "#111827" }}
+                        >
+                          Contact Number *
+                        </label>
+                        <input
+                          type="tel"
+                          name="reference2Contact"
+                          value={formData.reference2Contact}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                          style={{
+                            borderColor: "#12B99C",
+                            backgroundColor: "white",
+                          }}
+                          placeholder="Enter contact number"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Password Section */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  Password Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Password *
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "white",
+                      }}
+                      placeholder="Enter password"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Confirm Password *
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "white",
+                      }}
+                      placeholder="Re-enter password"
+                      required
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Partner Referral */}
+              <section>
+                <h2
+                  className="text-2xl font-semibold mb-6 flex items-center gap-3"
+                  style={{ color: "#111827" }}
+                >
+                  <FileText className="w-6 h-6" style={{ color: "#12B99C" }} />
+                  Partner Referral
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "#111827" }}
+                    >
+                      Partner Referral Code (optional) - use {defaultReferralCode} if you don't have a partner code
+                    </label>
+                    <input
+                      type="text"
+                      name="partnerReferralCode"
+                      value={formData.partnerReferralCode}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-opacity-50 transition-colors"
+                      style={{
+                        borderColor: "#12B99C",
+                        backgroundColor: "#F8FAFC",
+                      }}
+                      placeholder="Enter partner code"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Submit Button */}
+              <div className="flex justify-center pt-8">
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="px-12 py-4 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  style={{ backgroundColor: "#12B99C" }}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Submit Loan"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {modalOpen && (
+        <Modal onClose={() => setModalOpen(false)}>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Your application has been saved.
+            </h2>
+            <p className="mb-4">Do you want to submit it?</p>
+            {error && <div className="text-red-500 mb-2">{error}</div>}
+            <button
+              className="px-6 py-2 bg-green-600 text-white rounded-lg mr-4"
+              onClick={handleApplyNow}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Apply Now"}
+            </button>
+            <button
+              className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg"
+              onClick={() => setModalOpen(false)}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+    </>
+  );
+}

@@ -1,0 +1,197 @@
+import React, { useState, useEffect } from "react";
+import { Search, Filter, Eye, Users, Phone } from "lucide-react";
+import { fetchAsmApplications } from "../../../feature/thunks/asmThunks";
+import { useDispatch, useSelector } from "react-redux";
+
+const Application = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+
+  const dispatch = useDispatch();
+
+  const { data, loading, success, error } = useSelector(
+    (state) => state.asm.applications
+  );
+
+ 
+
+  useEffect(() => {
+    dispatch(fetchAsmApplications());
+  }, [dispatch]);
+
+  // Sample customer data
+  const applications = Array.isArray(data)
+    ? data.map((c) => ({
+        name: c.username,
+        id: c.userId,
+        phone: c.phone || "-",
+        applicationDate: new Date(c.applicationDate).toLocaleDateString(), // formatted
+        loanType: c.loanType,
+        loanAmount: c.loanAmount || 0,
+        disburseAmount: c.approvalAmount || 0,
+        status: c.status, // comes as "DISBURSED"
+      }))
+    : [];
+
+  // Filter applications based on search and status
+const filteredCustomers = applications.filter((customer) => {
+  const term = searchTerm.toLowerCase();
+
+  const matchesSearch =
+    customer.name?.toLowerCase().includes(term) ||
+    customer.id?.toLowerCase().includes(term) ||
+    customer.phone?.toLowerCase().includes(term);
+
+  const matchesFilter =
+    filterStatus === "All" ||
+    customer.status?.toLowerCase() === filterStatus.toLowerCase();
+
+  return matchesSearch && matchesFilter;
+});
+
+
+  // Helpers for status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Disbursed":
+        return "bg-green-100 text-green-800";
+      case "In Process":
+        return "bg-amber-100 text-amber-800";
+      case "Rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-slate-100 text-slate-800";
+    }
+  };
+
+  const colors = {
+    primary: "#12B99C",
+    secondary: "#1E3A8A",
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-6">
+      {/* Page Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">applications</h1>
+        {/* <p className="text-gray-600 mt-1">Manage your customer database</p> */}
+      </div>
+
+      {/* Search + Filter */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              placeholder="Search by name, ID, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div className="relative">
+            <Filter
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="pl-10 pr-8 py-3 border border-gray-200 rounded-xl bg-white min-w-[160px]"
+            >
+              <option value="All">All Status</option>
+              <option value="In Process">In Process</option>
+              <option value="Disbursed">Disbursed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Customer Table */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        {/* <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold" style={{ color: colors.secondary }}>
+            Customer Directory
+          </h2>
+        </div> */}
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr style={{backgroundColor: "rgb(18, 185, 156)"}} className="text-white">
+                <th className="px-3 py-3 text-left ">User Name</th>
+                <th className="px-3 py-3 text-left">User ID</th>
+                <th className="px-3 py-3 text-left">Contact</th>
+                <th className="px-3 py-3 text-left">Application Date</th>
+                <th className="px-3 py-3 text-left">Loan Type</th>
+                <th className="px-3 py-3 text-left">Loan Amount</th>
+                <th className="px-3 py-3 text-left">Disburse Amount</th>
+                <th className="px-3 py-3 text-left">Status</th>
+                {/* <th className="px-3 py-3 text-left">Action</th> */}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCustomers.map((customer) => (
+                <tr key={customer.id} className="border-b hover:bg-gray-50">
+                  <td className="px-3 py-4 font-medium">{customer.name}</td>
+                  <td className="px-3 py-4 text-gray-600">
+                    {customer.id ? customer.id : "N/A"}
+                  </td>
+                  <td className="px-3 py-4">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone size={14} /> {customer.phone}
+                    </div>
+                  </td>
+                  <td className="px-3 py-4 text-gray-600">
+                    {customer.applicationDate}
+                  </td>
+                  <td className="px-3 py-4">{customer.loanType}</td>
+                  <td className="px-3 py-4 font-semibold">
+                    {customer.loanAmount}
+                  </td>
+                  <td className="px-3 py-4 font-semibold">
+                    {customer.disburseAmount}
+                  </td>
+                  <td className="px-3 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        customer.status
+                      )}`}
+                    >
+                      {customer.status}
+                    </span>
+                  </td>
+                  {/* <td className="px-3 py-4">
+                    <button className="p-2 hover:bg-gray-100 rounded">
+                      <Eye size={16} />
+                    </button>
+                  </td> */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {filteredCustomers.length === 0 && (
+          <div className="text-center py-12">
+            <Users size={48} className="mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              No applications found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search or filters.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Application;
