@@ -335,12 +335,12 @@ const handleLoginAs = (userId) => {
               className="w-48 sm:w-64 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#12B99C]"
             />
 
-             <button
+             {/* <button
                 className="bg-[#12B99C] text-white px-4 ml-2 py-2 rounded-lg hover:bg-[#0d8a73] transition"
                 onClick={() => setIsModalOpen(true)}
               >
                 Set Target
-              </button>
+              </button> */}
 
             <button 
             className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
