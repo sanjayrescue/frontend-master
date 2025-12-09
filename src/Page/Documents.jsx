@@ -69,7 +69,7 @@ const Documents = () => {
           Find the required documents for every type of loan and financial service
         </p>
         <div className="w-full max-w-2xl mx-auto mt-8 h-2 bg-white/30 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full w-full"></div>
+          <div className="h-full bg-gradient-to-r from-[#0FAA8C]  to-[#0ea688] rounded-full w-full"></div>
         </div>
       </div>
 
