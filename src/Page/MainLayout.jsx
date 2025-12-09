@@ -88,7 +88,7 @@ const MainLayout = () => {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-gradient-to-br from-[#12B99C] to-[#0ea688] rounded-xl flex items-center justify-center text-white font-bold text-base shadow-lg">
-          TL
+          T
         </div>
         <div className="hidden sm:block">
           <div className="text-xl font-bold text-gray-800">Trustline Fintech</div>
