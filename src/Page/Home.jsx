@@ -108,7 +108,7 @@ const Home = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative mt-10 min-h-screen bg-gradient-to-br from-slate-900 via-teal-600 to-slate-900 flex items-center overflow-hidden">
+      <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-teal-600 to-slate-900 flex items-center overflow-hidden">
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 sm:w-48 sm:h-48 lg:w-72 lg:h-72 bg-gradient-to-r from-teal-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>

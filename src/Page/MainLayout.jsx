@@ -43,11 +43,11 @@ const MainLayout = () => {
 
 <>
 
-<div className="sticky top-0 z-50 w-full bg-white">
-  <div className="bg-gray-900 text-gray-200 text-xs sm:text-sm w-full shadow-lg font-inter">
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 sm:flex-wrap sm:flex-row sm:items-center sm:justify-center md:justify-end">
+<div className="sticky top-0 z-50 w-full bg-white shadow-md">
+  <div className="hidden lg:block bg-gray-900 text-gray-200 text-[11px] sm:text-xs md:text-sm w-full font-inter">
+    <div className="w-full px-3 sm:px-4 lg:px-8 py-2.5 flex flex-col sm:flex-wrap sm:flex-row items-center gap-2 sm:gap-3 md:gap-4 sm:justify-center md:justify-end text-center sm:text-left">
       {/* Right Section: Info */}
-      <div className="flex flex-wrap items-center gap-4 sm:gap-6 justify-center">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 justify-center">
         {/* Opening Hours */}
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-[#12B99C]" />
@@ -60,36 +60,34 @@ const MainLayout = () => {
         {/* Call Us */}
         <div className="flex items-center gap-2">
           <Phone className="w-4 h-4 text-[#12B99C]" />
-          <p className="font-semibold">
-            Call Us :
-            <span className="text-gray-400"> +91 8766681450</span>
-          </p>
+          <a href="tel:+918766681450" className="font-semibold hover:text-[#12B99C]">
+            Call Us : <span className="text-gray-400">+91 8766681450</span>
+          </a>
         </div>
 
         {/* Email Us */}
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-[#12B99C]" />
-          <p className="font-semibold">
-            Email Us :
-            <span className="text-gray-400"> support@trustlinefintech.com</span>
-          </p>
+          <a href="mailto:support@trustlinefintech.com" className="font-semibold hover:text-[#12B99C]">
+            Email Us : <span className="text-gray-400">support@trustlinefintech.com</span>
+          </a>
         </div>
       </div>
     </div>
   </div>
 
 {/* Navbar */}
-<header className="bg-white shadow-lg w-full font-inter border-b border-gray-100">
+<header className="bg-white w-full font-inter border-b border-gray-100">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex justify-between items-center py-3">
       {/* Logo */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div className="w-10 h-10 bg-gradient-to-br from-[#12B99C] to-[#0ea688] rounded-xl flex items-center justify-center text-white font-bold text-base shadow-lg">
           T
         </div>
-        <div className="hidden sm:block">
-          <div className="text-xl font-bold text-gray-800">Trustline Fintech</div>
-          <div className="text-xs text-[#12B99C] font-medium">
+        <div className="block leading-tight">
+          <div className="text-base sm:text-xl font-bold text-gray-800">Trustline Fintech</div>
+          <div className="text-[10px] sm:text-xs text-[#12B99C] font-medium">
             Financial Consultancy
           </div>
         </div>
@@ -158,7 +156,7 @@ const MainLayout = () => {
 
 {/* Mobile Menu Overlay */}
 <div
-  className={`fixed inset-0 bg-white/50 z-50 lg:hidden transform transition-transform duration-300 ease-in-out backdrop-blur-md ${
+  className={`fixed inset-0 bg-white z-50 lg:hidden transform transition-transform duration-300 ease-in-out ${
     isMenuOpen ? "translate-x-0" : "translate-x-full"
   }`}
   onClick={toggleMenu}
