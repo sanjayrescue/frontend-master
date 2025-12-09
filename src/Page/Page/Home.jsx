@@ -386,8 +386,8 @@ const Home = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white mb-1">Email Us</h3>
-              <a href="mailto:support@Trustlinefintech.com" className="text-lg font-bold text-teal-400 hover:text-teal-300 transition-colors break-all">
-                support@Trustlinefintech.com
+              <a href="mailto:support@trustlinefintech.com" className="text-lg font-bold text-teal-400 hover:text-teal-300 transition-colors break-all">
+                support@trustlinefintech.com
               </a>
             </div>
           </div>

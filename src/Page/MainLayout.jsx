@@ -74,7 +74,7 @@ const MainLayout = () => {
         <Mail className="w-4 h-4 text-[#12B99C]" />
         <p className="font-semibold">
           Email Us :
-          <span className="text-gray-400">  support@Trustlinefintech.com</span>
+          <span className="text-gray-400">  support@trustlinefintech.com</span>
         </p>
       </div>
     </div>
@@ -264,7 +264,7 @@ const MainLayout = () => {
           <ul className="space-y-4 text-sm text-gray-300">
             <li className="flex items-start gap-3">
               <FaEnvelope className="mt-1 text-[#12B99C]" />
-              <a href="mailto:support@Trustlinefintech.com" className="hover:text-[#12B99C] transition">support@Trustlinefintech.com</a>
+              <a href="mailto:support@trustlinefintech.com" className="hover:text-[#12B99C] transition">support@trustlinefintech.com</a>
             </li>
             <li className="flex items-start gap-3">
               <FaPhoneAlt className="mt-1 text-[#12B99C]" />
