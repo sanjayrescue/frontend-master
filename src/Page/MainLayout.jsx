@@ -43,48 +43,45 @@ const MainLayout = () => {
 
 <>
 
-<div className="fixed top-0 left-0 z-50 w-full">
+<div className="sticky top-0 z-50 w-full bg-white">
+  <div className="bg-gray-900 text-gray-200 text-xs sm:text-sm w-full shadow-lg font-inter">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 sm:flex-wrap sm:flex-row sm:items-center sm:justify-center md:justify-end">
+      {/* Right Section: Info */}
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6 justify-center">
+        {/* Opening Hours */}
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-[#12B99C]" />
+          <p className="font-semibold">
+            Opening Hour :
+            <span className="text-gray-400"> Mon - Fri, 9:00 AM - 6:00 PM</span>
+          </p>
+        </div>
 
-<div className="bg-gray-900 text-gray-200 text-sm  w-full shadow-lg font-inter">
-  <div className="w-full px-5 mx-auto py-4 flex flex-col md:flex-row items-center justify-end">
-    {/* Right Section: Info */}
-    <div className="flex flex-wrap md:flex-nowrap items-center gap-6">
-      {/* Opening Hours */}
-      <div className="flex items-center gap-2">
-        <Clock className="w-4 h-4 text-[#12B99C]" />
-        <p className="font-semibold">
-          Opening Hour : 
-          <span className="text-gray-400"> Mon - Fri, 9:00 AM - 6:00 PM</span>
-        </p>
-      </div>
+        {/* Call Us */}
+        <div className="flex items-center gap-2">
+          <Phone className="w-4 h-4 text-[#12B99C]" />
+          <p className="font-semibold">
+            Call Us :
+            <span className="text-gray-400"> +91 8766681450</span>
+          </p>
+        </div>
 
-      {/* Call Us */}
-      <div className="flex items-center gap-2">
-        <span>&nbsp;&nbsp;</span>
-        <Phone className="w-4 h-4 text-[#12B99C]" />
-        <p className="font-semibold">
-       
-          Call Us :
-          <span className="text-gray-400"> +91 8766681450 &nbsp;&nbsp;</span>
-        </p>
-      </div>
-
-      {/* Email Us */}
-      <div className="flex items-center gap-2">
-        <Mail className="w-4 h-4 text-[#12B99C]" />
-        <p className="font-semibold">
-          Email Us :
-          <span className="text-gray-400">  support@trustlinefintech.com</span>
-        </p>
+        {/* Email Us */}
+        <div className="flex items-center gap-2">
+          <Mail className="w-4 h-4 text-[#12B99C]" />
+          <p className="font-semibold">
+            Email Us :
+            <span className="text-gray-400"> support@trustlinefintech.com</span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 {/* Navbar */}
-<header className="bg-white shadow-lg  w-full z-40 font-inter">
-  <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="flex justify-between items-center py-2">
+<header className="bg-white shadow-lg w-full font-inter border-b border-gray-100">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between items-center py-3">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-gradient-to-br from-[#12B99C] to-[#0ea688] rounded-xl flex items-center justify-center text-white font-bold text-base shadow-lg">
