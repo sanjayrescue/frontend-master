@@ -109,6 +109,9 @@ export default function HomeLoanSelfEmployee() {
   const [applicationId, setApplicationId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [savedApplication, setSavedApplication] = useState(null);
 
   // const handleInputChange = (e) => {
   //     const { name, value } = e.target;
@@ -302,16 +305,21 @@ export default function HomeLoanSelfEmployee() {
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
+  setValidationErrors([]);
+  setSuccessMessage("");
+  setSavedApplication(null);
     try {
       const errors = validateForm(formData, sameAddress);
       if (errors.length > 0) {
-        alert(errors.join("\n")); // show all in one alert
-        return;
-      }
-  if (error) {
-    alert(error);
-    return;
-      }
+      setValidationErrors(errors);
+      setLoading(false);
+      return;
+    }
+    if (error) {
+      setValidationErrors([error]);
+      setLoading(false);
+      return;
+    }
 
       // Build nested JSON structure
       const applicationData = {
@@ -452,13 +460,10 @@ export default function HomeLoanSelfEmployee() {
       });
 
 
-      if(!checkFileSize(docsQueue)){
-        return ;
-      }
-
-
-
-
+  if(!checkFileSize(docsQueue)){
+    setLoading(false);
+    return ;
+  }
       const endpoint = isPartnerLoggedIn
         ? `${backendurl}/partner/create-applications`
         : `${backendurl}/partner/public/create-application`;
@@ -478,11 +483,16 @@ export default function HomeLoanSelfEmployee() {
       const data = response.data;
 
       setApplicationId(data.id);
-      setModalOpen(true);
+  setSavedApplication(data);
+  setSuccessMessage(
+    data.message || "Application saved successfully. You can submit now."
+  );
+  setModalOpen(true);
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Something went wrong."
-      );
+  setError(
+    err.response?.data?.message || err.message || "Something went wrong."
+  );
+  setValidationErrors(err.response?.data?.errors || []);
     } finally {
       setLoading(false);
     }
@@ -508,12 +518,13 @@ export default function HomeLoanSelfEmployee() {
         }
       );
       setModalOpen(false);
-      alert("Application submitted successfully!");
+      setSuccessMessage("Application submitted successfully.");
       resetFields();
     } catch (err) {
       setError(
         err.response?.data?.message || err.message || "Something went wrong."
       );
+      setValidationErrors(err.response?.data?.errors || []);
     } finally {
       setLoading(false);
     }
@@ -603,16 +614,16 @@ export default function HomeLoanSelfEmployee() {
 
 
   const checkFileSize = (files) => {
-    const maxSize = 2 * 1024 * 1024; // 2 MB
-  
+    const maxSize = 20 * 1024 * 1024; // 20 MB
+
     for (let fileObj of files) {
       if (fileObj?.file && fileObj.file.size > maxSize) {
         const type = fileObj.type;
-        alert(`${type} file is too large. Maximum allowed size is 2MB.`);
+        setError(`${type} file is too large. Maximum allowed size is 20MB.`);
         return false; // Return the type of the file that exceeded size
       }
     }
-  
+
     return true; // All files are valid
   };
 
@@ -622,6 +633,28 @@ export default function HomeLoanSelfEmployee() {
       style={{ backgroundColor: "#F8FAFC" }}
     >
       <div className="max-w-4xl mx-auto">
+        {successMessage && (
+          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">{successMessage}</p>
+                {savedApplication?.appNo && (
+                  <p className="text-sm mt-1">
+                    Application ID: {savedApplication.appNo}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="text-sm underline"
+                onClick={() => setSuccessMessage("")}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div
