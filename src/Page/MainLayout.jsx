@@ -221,7 +221,7 @@ const MainLayout = () => {
 
 
       <footer className="bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 text-white pt-12 pb-6 px-4 sm:px-10 overflow-hidden">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
 
           {/* About Us */}
           <div>
