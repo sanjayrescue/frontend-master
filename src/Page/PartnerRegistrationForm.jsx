@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -32,6 +33,7 @@ const PartnerRegistrationForm = () => {
   const selfieInputRef = useRef(null);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -152,6 +154,15 @@ const PartnerRegistrationForm = () => {
       return showError("Aadhaar, PAN and Selfie files are required");
     }
 
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const oversized =
+      (formData.adharCard && formData.adharCard.size > maxFileSize) ||
+      (formData.panCard && formData.panCard.size > maxFileSize) ||
+      (formData.selfie && formData.selfie.size > maxFileSize);
+    if (oversized) {
+      return showError("Each file must be 5MB or less");
+    }
+
     const newFormData = {
       firstName: formData.firstName,
       middleName: formData.middleName || null,
@@ -203,6 +214,7 @@ const PartnerRegistrationForm = () => {
       );
       setShowPopup(true);
       resetFields();
+      setTimeout(() => navigate("/LoginPage"), 800);
     } catch (err) {
       const backendMsg =
         err?.message ||
@@ -453,7 +465,7 @@ const PartnerRegistrationForm = () => {
                         name="panNumber"
                         value={formData.panNumber || ""}
                         onChange={handleChange}
-                        placeholder="Enter your PAN number"
+                        placeholder="Enter your PAN (e.g., ABCDE1234F)"
                         className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white/50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200 uppercase"
                         required
                         maxLength={10}
@@ -642,6 +654,7 @@ const PartnerRegistrationForm = () => {
                         ? formData.adharCard.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
                 <div className="relative group">
@@ -676,6 +689,7 @@ const PartnerRegistrationForm = () => {
                         ? formData.panCard.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
                 <div className="relative group">
@@ -710,6 +724,7 @@ const PartnerRegistrationForm = () => {
                         ? formData.selfie.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
               </div>
