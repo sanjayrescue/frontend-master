@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   User,
   Mail,
@@ -11,6 +11,9 @@ import {
   Upload,
   CheckCircle,
   Calendar,
+  Eye,
+  EyeOff,
+  X,
 } from "lucide-react";
 import { signupPartner } from "../feature/thunks/partnerThunks";
 import { useDispatch } from "react-redux";
@@ -20,6 +23,13 @@ const PartnerRegistrationForm = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [successMessageType, setSuccessMessageType] = useState(""); // "success" or "error"
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+  const adharInputRef = useRef(null);
+  const panInputRef = useRef(null);
+  const selfieInputRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -47,7 +57,15 @@ const PartnerRegistrationForm = () => {
     accountNumber: "",
     ifscCode: "",
     password: "",
+    confirmPassword: "",
   });
+
+  const showError = (message) => {
+    setSuccessMessageType("error");
+    setSuccessMessage(message);
+    setShowPopup(true);
+    return false;
+  };
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -57,53 +75,81 @@ const PartnerRegistrationForm = () => {
     });
   };
 
+  const handleRemoveFile = (name) => {
+    setFormData({
+      ...formData,
+      [name]: null,
+    });
+
+    if (name === "adharCard" && adharInputRef.current) {
+      adharInputRef.current.value = "";
+    }
+    if (name === "panCard" && panInputRef.current) {
+      panInputRef.current.value = "";
+    }
+    if (name === "selfie" && selfieInputRef.current) {
+      selfieInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Basic validation rules
-    if (!formData.firstName?.trim()) {
-      setSuccessMessageType("error");
-      setSuccessMessage("First name is required");
-      setShowPopup(true);
-      return;
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "phone",
+      "email",
+      "dob",
+      "aadharNumber",
+      "panNumber",
+      "region",
+      "address",
+      "pincode",
+      "homeType",
+      "addressStability",
+      "employmentType",
+      "bankName",
+      "accountNumber",
+      "ifscCode",
+      "password",
+      "confirmPassword",
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field] || `${formData[field]}`.trim() === "") {
+        return showError("Please fill all required fields.");
+      }
     }
 
-    if (!formData.phone || !/^[6-9]\d{9}$/.test(formData.phone)) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Enter a valid 10-digit phone number");
-      setShowPopup(true);
-      return;
+    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      return showError("Enter a valid 10-digit phone number");
     }
 
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Enter a valid email address");
-      setShowPopup(true);
-      return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return showError("Enter a valid email address");
     }
 
-    if (!formData.aadharNumber || !/^\d{12}$/.test(formData.aadharNumber)) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Enter a valid 12-digit Aadhar number");
-      setShowPopup(true);
-      return;
+    if (!/^\d{12}$/.test(formData.aadharNumber)) {
+      return showError("Enter a valid 12-digit Aadhar number");
     }
 
-    if (
-      !formData.panNumber ||
-      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)
-    ) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Enter a valid PAN number (ABCDE1234F)");
-      setShowPopup(true);
-      return;
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) {
+      return showError("Enter a valid PAN number (ABCDE1234F)");
     }
 
-    if (!formData.password || formData.password.length < 6) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Password must be at least 6 characters long");
-      setShowPopup(true);
-      return;
+    if (formData.password.length < 6) {
+      return showError("Password must be at least 6 characters long");
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return showError("Password and Confirm Password do not match");
+    }
+
+    // File validations
+    if (!formData.adharCard || !formData.panCard || !formData.selfie) {
+      return showError("Aadhaar, PAN and Selfie files are required");
     }
 
     const newFormData = {
@@ -146,38 +192,24 @@ const PartnerRegistrationForm = () => {
       formDataToSend.append("selfie", formData.selfie);
     }
 
-    // Debugging
-   
-    for (let [key, value] of formDataToSend.entries()) {
-     
-    }
-
-   
-
-    // ✅ Dispatch with FormData
-    // dispatch(signupPartner(formDataToSend));
-
     setIsLoading(true); // start spinner
 
     try {
-      const response = dispatch(signupPartner(formDataToSend));
+      const response = await dispatch(signupPartner(formDataToSend)).unwrap();
 
-      if (response.type.endsWith("/fulfilled")) {
-        setSuccessMessageType("success");
-        setSuccessMessage("Registration successful!");
-        setShowPopup(true);
-        resetFields();
-
-       
-      } else {
-        setSuccessMessageType("error");
-        setSuccessMessage(response.payload?.message || "Registration failed");
-        setShowPopup(true);
-      }
-    } catch (err) {
-      setSuccessMessageType("error");
-      setSuccessMessage("Something went wrong. Please try again.");
+      setSuccessMessageType("success");
+      setSuccessMessage(
+        response?.message || "Registration successful!"
+      );
       setShowPopup(true);
+      resetFields();
+    } catch (err) {
+      const backendMsg =
+        err?.message ||
+        err?.error ||
+        err?.payload?.message ||
+        "Registration failed. Please try again.";
+      showError(backendMsg);
     } finally {
       setIsLoading(false); // stop spinner
     }
@@ -208,6 +240,7 @@ const PartnerRegistrationForm = () => {
       accountNumber: "",
       ifscCode: "",
       password: "",
+    confirmPassword: "",
     });
   };
 
@@ -586,11 +619,29 @@ const PartnerRegistrationForm = () => {
                     <input
                       type="file"
                       name="adharCard"
+                      ref={adharInputRef}
                       onChange={handleChange}
-                      className="w-full p-4 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700"
+                      className="w-full p-4 pr-24 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700 text-transparent caret-transparent"
                       required
                     />
+                    {formData.adharCard && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile("adharCard")}
+                        className="absolute inset-y-0 right-12 flex items-center text-slate-500 hover:text-red-600"
+                        title="Remove file"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
                     <Upload className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600 flex items-center justify-between">
+                    <span className="truncate max-w-[80%]">
+                      {formData.adharCard
+                        ? formData.adharCard.name
+                        : "No file selected"}
+                    </span>
                   </div>
                 </div>
                 <div className="relative group">
@@ -602,11 +653,29 @@ const PartnerRegistrationForm = () => {
                     <input
                       type="file"
                       name="panCard"
+                      ref={panInputRef}
                       onChange={handleChange}
-                      className="w-full p-4 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700"
+                      className="w-full p-4 pr-24 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700 text-transparent caret-transparent"
                       required
                     />
+                    {formData.panCard && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile("panCard")}
+                        className="absolute inset-y-0 right-12 flex items-center text-slate-500 hover:text-red-600"
+                        title="Remove file"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
                     <Upload className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600 flex items-center justify-between">
+                    <span className="truncate max-w-[80%]">
+                      {formData.panCard
+                        ? formData.panCard.name
+                        : "No file selected"}
+                    </span>
                   </div>
                 </div>
                 <div className="relative group">
@@ -618,11 +687,29 @@ const PartnerRegistrationForm = () => {
                     <input
                       type="file"
                       name="selfie"
+                      ref={selfieInputRef}
                       onChange={handleChange}
-                      className="w-full p-4 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700"
+                      className="w-full p-4 pr-24 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-500 file:to-teal-600 file:text-white hover:file:from-emerald-600 hover:file:to-teal-700 text-transparent caret-transparent"
                       required
                     />
+                    {formData.selfie && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile("selfie")}
+                        className="absolute inset-y-0 right-12 flex items-center text-slate-500 hover:text-red-600"
+                        title="Remove file"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
                     <Upload className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600 flex items-center justify-between">
+                    <span className="truncate max-w-[80%]">
+                      {formData.selfie
+                        ? formData.selfie.name
+                        : "No file selected"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -700,21 +787,74 @@ const PartnerRegistrationForm = () => {
                 <h2 className="text-2xl font-bold text-slate-800">Security</h2>
               </div>
 
-              <div className="relative max-w-md">
-                <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+              <div className="space-y-2">
+                <label className=" text-slate-700 font-semibold flex items-center gap-2">
                   <Lock className="w-4 h-4 text-emerald-500" />
                   Create Password
                 </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full p-4 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-300 placeholder-slate-400"
-                  placeholder="Enter a strong password"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword.password ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full p-4 pr-12 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-300 placeholder-slate-400"
+                    placeholder="Enter a strong password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPassword((prev) => ({
+                        ...prev,
+                        password: !prev.password,
+                      }))
+                    }
+                    className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword.password ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
+              <div className="space-y-2">
+                <label className=" text-slate-700 font-semibold flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-emerald-500" />
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword.confirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full p-4 pr-12 bg-white/50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-300 placeholder-slate-400"
+                    placeholder="Re-enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPassword((prev) => ({
+                        ...prev,
+                        confirmPassword: !prev.confirmPassword,
+                      }))
+                    }
+                    className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword.confirmPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
             </div>
 
             <div className="px-8 pb-8">

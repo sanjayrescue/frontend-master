@@ -105,6 +105,10 @@ export default function PersonalLoan() {
   const [applicationId, setApplicationId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [savedApplication, setSavedApplication] = useState(null);
 
 
   const handleInputChange = (e) => {
@@ -114,6 +118,13 @@ export default function PersonalLoan() {
       ...prev,
       [name]: name === "loanAmount" ? parseInt(value, 10) || 0 : value,
     }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -169,6 +180,11 @@ export default function PersonalLoan() {
     }
   };
 
+  const renderError = (field) =>
+    fieldErrors[field] ? (
+      <p className="text-xs text-red-600 mt-1">{fieldErrors[field]}</p>
+    ) : null;
+
   const handleSameAddressChange = (e) => {
     setSameAddress(e.target.checked);
     if (e.target.checked) {
@@ -185,68 +201,72 @@ export default function PersonalLoan() {
   };
 
   function validateRegistrationForm(formData) {
-    const errors = [];
+    const errors = {};
 
     // Personal fields
-    if (!formData.firstName) errors.push("First name is required.");
-    if (!formData.lastName) errors.push("Last name is required.");
-    if (!formData.motherName) errors.push("Mother's name is required.");
-    if (!formData.pan) errors.push("PAN number is required.");
-    if (!formData.gender) errors.push("Gender is required.");
-    if (!formData.maritalStatus) errors.push("Marital status is required.");
-    if (!formData.password) errors.push("Password is required.");
-    if (!formData.confirmPassword) errors.push("Confirm Password is required.");
+    if (!formData.firstName) errors.firstName = "First name is required.";
+    if (!formData.lastName) errors.lastName = "Last name is required.";
+    if (!formData.motherName) errors.motherName = "Mother's name is required.";
+    if (!formData.pan) errors.pan = "PAN number is required.";
+    if (!formData.gender) errors.gender = "Gender is required.";
+    if (!formData.maritalStatus) errors.maritalStatus = "Marital status is required.";
+    if (!formData.password) errors.password = "Password is required.";
+    if (!formData.confirmPassword) errors.confirmPassword = "Confirm Password is required.";
     if (
       formData.password &&
       formData.confirmPassword &&
       formData.password !== formData.confirmPassword
     ) {
-      errors.push("Passwords do not match.");
+      errors.confirmPassword = "Passwords do not match.";
     }
 
     // Contact info
     if (!formData.contactNo) {
-      errors.push("Contact number is required.");
+      errors.contactNo = "Contact number is required.";
     } else if (!/^\d{10}$/.test(formData.contactNo)) {
-      errors.push("Contact number must be exactly 10 digits.");
+      errors.contactNo = "Contact number must be exactly 10 digits.";
     }
 
     if (!formData.email) {
-      errors.push("Email is required.");
+      errors.email = "Email is required.";
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      errors.push("Invalid email format.");
+      errors.email = "Invalid email format.";
     }
 
     if (!formData.dob) {
-      errors.push("Date of Birth is required.");
+      errors.dob = "Date of Birth is required.";
     } else if (getAgeFromDOB(formData.dob) < 18) {
-      errors.push("You must be at least 18 years old to proceed.");
+      errors.dob = "You must be at least 18 years old to proceed.";
     }
 
     // Address
-    if (!formData.currentAddress) errors.push("Current address is required.");
-    if (!formData.permanentAddress)
-      errors.push("Permanent address is required.");
+    if (!formData.currentAddress) errors.currentAddress = "Current address is required.";
+    if (!formData.permanentAddress) errors.permanentAddress = "Permanent address is required.";
 
     // Employment
-    if (!formData.companyName) errors.push("Company name is required.");
-    if (!formData.designation) errors.push("Designation is required.");
-    if (!formData.companyAddress) errors.push("Company address is required.");
-    if (!formData.monthlySalary) errors.push("Monthly salary is required.");
+    if (!formData.companyName) errors.companyName = "Company name is required.";
+    if (!formData.designation) errors.designation = "Designation is required.";
+    if (!formData.companyAddress) errors.companyAddress = "Company address is required.";
+    if (!formData.monthlySalary) errors.monthlySalary = "Monthly salary is required.";
 
     // References
-    if (!formData.reference1Name) errors.push("Reference 1 name is required.");
+    if (!formData.reference1Name) errors.reference1Name = "Reference 1 name is required.";
     if (!formData.reference1Contact) {
-      errors.push("Reference 1 contact is required.");
+      errors.reference1Contact = "Reference 1 contact is required.";
     } else if (!/^\d{10}$/.test(formData.reference1Contact)) {
-      errors.push("Reference 1 contact must be exactly 10 digits.");
+      errors.reference1Contact = "Reference 1 contact must be exactly 10 digits.";
     }
 
-    if (!formData.reference2Name) errors.push("Reference 2 name is required.");
+    if (!formData.reference2Name) errors.reference2Name = "Reference 2 name is required.";
     if (!formData.reference2Contact) {
-      errors.push("Reference 2 contact is required.");
+      errors.reference2Contact = "Reference 2 contact is required.";
     } else if (!/^\d{10}$/.test(formData.reference2Contact)) {
-      errors.push("Reference 2 contact must be exactly 10 digits.");
+      errors.reference2Contact = "Reference 2 contact must be exactly 10 digits.";
+    }
+
+    // Loan
+    if (formData.loanAmount === "" || formData.loanAmount === null || formData.loanAmount === undefined) {
+      errors.loanAmount = "Loan amount is required.";
     }
 
     return errors;
@@ -255,11 +275,17 @@ export default function PersonalLoan() {
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
+    setFieldErrors({});
+    setValidationErrors([]);
+    setSuccessMessage("");
+    setSavedApplication(null);
 
     try {
       const errors = validateRegistrationForm(formData);
-      if (errors.length > 0) {
-        alert(errors.join("\n")); // show all errors at once
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setValidationErrors(Object.values(errors));
+        setLoading(false);
         return;
       }
 
@@ -353,6 +379,7 @@ export default function PersonalLoan() {
       });
 
       if (!checkFileSize(docsQueue)) {
+        setLoading(false);
         return;
       }
 
@@ -376,9 +403,17 @@ export default function PersonalLoan() {
 
       const data = response.data;
       setApplicationId(data.id);
+      setSavedApplication(data);
+      setSuccessMessage(
+        data.message || "Application saved successfully. You can submit now."
+      );
       setModalOpen(true);
     } catch (error) {
       console.error(error);
+      setError(
+        error.response?.data?.message || "Failed to save application. Try again."
+      );
+      setValidationErrors(error.response?.data?.errors || []);
     } finally {
       setLoading(false);
     }
@@ -405,12 +440,13 @@ export default function PersonalLoan() {
         }
       );
       setModalOpen(false);
-      alert("Application submitted successfully!");
+      setSuccessMessage("Application submitted successfully.");
       resetFields();
     } catch (err) {
       setError(
         err.response?.data?.message || err.message || "Something went wrong."
       );
+      setValidationErrors(err.response?.data?.errors || []);
     } finally {
       setLoading(false);
     }
@@ -510,12 +546,14 @@ export default function PersonalLoan() {
   };
 
   const checkFileSize = (files) => {
-    const maxSize = 2 * 1024 * 1024; // 2 MB
+    const maxSize = 20 * 1024 * 1024; // 20 MB
 
     for (let fileObj of files) {
       if (fileObj?.file && fileObj.file.size > maxSize) {
         const type = fileObj.type;
-        alert(`${type} file is too large. Maximum allowed size is 2MB.`);
+        setError(
+          `${type} file is too large. Maximum allowed size is 20MB.`
+        );
         return false; // Return the type of the file that exceeded size
       }
     }
@@ -559,6 +597,28 @@ export default function PersonalLoan() {
         style={{ backgroundColor: "#F8FAFC" }}
       >
         <div className="max-w-4xl mx-auto">
+          {successMessage && (
+            <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{successMessage}</p>
+                  {savedApplication?.appNo && (
+                    <p className="text-sm mt-1">
+                      Application ID: {savedApplication.appNo}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="text-sm underline"
+                  onClick={() => setSuccessMessage("")}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
             {/* Header */}
             <div
@@ -605,6 +665,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your first name"
                       required
                     />
+                    {renderError("firstName")}
                   </div>
                   <div>
                     <label
@@ -647,6 +708,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your last name"
                       required
                     />
+                    {renderError("lastName")}
                   </div>
                   {/* name end */}
                   <div>
@@ -675,6 +737,7 @@ export default function PersonalLoan() {
                         required
                       />
                     </div>
+                    {renderError("contactNo")}
                   </div>
                   <div>
                     <label
@@ -702,6 +765,7 @@ export default function PersonalLoan() {
                         required
                       />
                     </div>
+                    {renderError("email")}
                   </div>
                   <div>
                     <label
@@ -725,6 +789,7 @@ export default function PersonalLoan() {
                         required
                       />
                     </div>
+                    {renderError("pan")}
                   </div>
                   <div>
                     <label
@@ -751,6 +816,7 @@ export default function PersonalLoan() {
                         required
                       />
                     </div>
+                    {renderError("dob")}
                   </div>
                   <div>
                     <label
@@ -775,6 +841,7 @@ export default function PersonalLoan() {
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+                    {renderError("gender")}
                   </div>
                   <div>
                     <label
@@ -820,6 +887,7 @@ export default function PersonalLoan() {
                       <option value="single">Single</option>
                       <option value="married">Married</option>
                     </select>
+                    {renderError("maritalStatus")}
                   </div>
                   {formData.maritalStatus === "married" && (
                     <div>
@@ -864,6 +932,7 @@ export default function PersonalLoan() {
                       placeholder="Enter mother name"
                       required
                     />
+                    {renderError("motherName")}
                   </div>
                 </div>
               </section>
@@ -898,6 +967,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your current address"
                       required
                     />
+                    {renderError("currentAddress")}
                   </div>
 
                   <div className="flex flex-wrap -mx-2">
@@ -1036,6 +1106,7 @@ export default function PersonalLoan() {
                       disabled={sameAddress}
                       required
                     />
+                    {renderError("permanentAddress")}
                   </div>
 
                   <div className="flex flex-wrap -mx-2">
@@ -1174,6 +1245,7 @@ export default function PersonalLoan() {
                       min="0"
                       required
                     />
+                    {renderError("loanAmount")}
                   </div>
                 </div>
               </section>
@@ -1330,6 +1402,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your company name"
                       required
                     />
+                    {renderError("companyName")}
                   </div>
                   <div>
                     <label
@@ -1351,6 +1424,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your designation"
                       required
                     />
+                    {renderError("designation")}
                   </div>
                   <div>
                     <label
@@ -1372,6 +1446,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your company address"
                       required
                     />
+                    {renderError("companyAddress")}
                   </div>
                   <div>
                     <label
@@ -1394,6 +1469,7 @@ export default function PersonalLoan() {
                       min="0"
                       required
                     />
+                    {renderError("monthlySalary")}
                   </div>
                   <div>
                     <label
@@ -2154,6 +2230,7 @@ export default function PersonalLoan() {
                           placeholder="Enter reference name"
                           required
                         />
+                        {renderError("reference1Name")}
                       </div>
                       <div>
                         <label
@@ -2175,6 +2252,7 @@ export default function PersonalLoan() {
                           placeholder="Enter contact number"
                           required
                         />
+                        {renderError("reference1Contact")}
                       </div>
                     </div>
                   </div>
@@ -2212,6 +2290,7 @@ export default function PersonalLoan() {
                           placeholder="Enter reference name"
                           required
                         />
+                        {renderError("reference2Name")}
                       </div>
                       <div>
                         <label
@@ -2233,6 +2312,7 @@ export default function PersonalLoan() {
                           placeholder="Enter contact number"
                           required
                         />
+                        {renderError("reference2Contact")}
                       </div>
                     </div>
                   </div>
@@ -2268,6 +2348,7 @@ export default function PersonalLoan() {
                       placeholder="Enter password"
                       required
                     />
+                    {renderError("password")}
                   </div>
                   <div>
                     <label
@@ -2289,6 +2370,7 @@ export default function PersonalLoan() {
                       placeholder="Re-enter password"
                       required
                     />
+                    {renderError("confirmPassword")}
                   </div>
                 </div>
               </section>
