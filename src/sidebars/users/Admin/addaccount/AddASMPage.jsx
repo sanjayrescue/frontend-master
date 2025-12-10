@@ -225,7 +225,7 @@ const handleSubmit = async (e) => {
               {/* Success Icon */}
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
 
-              { message == "Area Sales Manager has been added successfully to your team."
+              { message === "Area Sales Manager has been added successfully to your team."
               ?   <CheckCircle size={32} className="text-green-500" />: <XCircle size={32} className="text-red-500" />
               }
               
@@ -234,13 +234,13 @@ const handleSubmit = async (e) => {
               {/* Success Message */}
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
 
-              { message == "Area Sales Manager has been added successfully to your team."
-              ?  'Success!' : ""
+              { message === "Area Sales Manager has been added successfully to your team."
+              ?  'Success!' : "Something went wrong"
               }
               
               </h2>
               <p className="text-gray-600 mb-6">
-               {message}
+               {message || "We couldn't process your request. Please try again or contact support."}
               </p>
 
    
