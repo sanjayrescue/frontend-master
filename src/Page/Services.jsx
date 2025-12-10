@@ -96,7 +96,7 @@ const navigate = useNavigate();
 
  
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 mt-18">
+    <section className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
      
         <div className="text-center mb-16">
