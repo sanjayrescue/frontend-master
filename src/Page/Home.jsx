@@ -109,128 +109,120 @@ const Home = () => {
     <>
       {/* Hero Section */}
       <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-teal-600 to-slate-900 flex items-center overflow-hidden">
-      {/* Animated background particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 sm:w-48 sm:h-48 lg:w-72 lg:h-72 bg-gradient-to-r from-teal-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 lg:w-96 lg:h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 right-1/3 w-24 h-24 sm:w-32 sm:h-32 lg:w-48 lg:h-48 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 sm:w-48 sm:h-48 lg:w-72 lg:h-72 bg-gradient-to-r from-teal-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 lg:w-96 lg:h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-24 h-24 sm:w-32 sm:h-32 lg:w-48 lg:h-48 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 py-8 sm:py-12 lg:py-0">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
-          
-          {/* Left Content */}
-          <div className="max-w-2xl text-center lg:text-left order-2 lg:order-1">
-            {/* Modern digital banking badge */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 py-8 sm:py-12 lg:py-0">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
 
-            <h1
-              ref={container}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4.5rem] font-black text-white leading-[1.1] mb-4 sm:mb-6 tracking-tight"
-            >
-              <div className="line bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
-                Quick Cash
-              </div>
-              <div className="line bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
-                Zero Stress.
-              </div>
-              <div className="line bg-gradient-to-r from-[#12B99C] via-emerald-400 to-teal-400 bg-clip-text text-transparent drop-shadow-2xl">
-                Trustline Fintech
-              </div>
-            </h1>
+            {/* Left Content */}
+            <div className="max-w-2xl text-center lg:text-left order-2 lg:order-1">
+              {/* Modern digital banking badge */}
 
-            <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 sm:mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
-              Get Loan in minutes, Low Cibil Score no issue, Tie-up with 100+ lenders.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6">
-              <button
-                ref={button}
-                className="group relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 text-white font-bold text-base sm:text-lg rounded-full shadow-2xl hover:shadow-[0_20px_40px_rgba(236,72,153,0.4)] transform hover:-translate-y-2 transition-all duration-500 overflow-hidden"
-                onClick={() => navigate('/PartnerRegistrationForm')}
+              <h1
+                ref={container}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4.5rem] font-black text-white leading-[1.1] mb-4 sm:mb-6 tracking-tight"
               >
-                <span className="cursor-pointer relative z-10">Become A Partner →</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-red-400 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
+                <div className="line bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+                  Quick Cash
+                </div>
+                <div className="line bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+                  Zero Stress.
+                </div>
+                <div className="line bg-gradient-to-r from-[#12B99C] via-emerald-400 to-teal-400 bg-clip-text text-transparent drop-shadow-2xl">
+                  Trustline Fintech
+                </div>
+              </h1>
 
-              {/* <button 
-                className="cursor-pointer group text-white font-bold text-base sm:text-lg hover:text-[#12B99C] transition-all duration-300 flex items-center gap-2"
-                onClick={() => navigate('/channel-partner')}
-              >
-                Download Apk
-                <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </button> */}
+              <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 sm:mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
+                Get Loan in minutes, Low Cibil Score no issue, Tie-up with 100+ lenders.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6">
+                <button
+                  ref={button}
+                  className="group relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 text-white font-bold text-base sm:text-lg rounded-full shadow-2xl hover:shadow-[0_20px_40px_rgba(236,72,153,0.4)] transform hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+                  onClick={() => navigate('/PartnerRegistrationForm')}
+                >
+                  <span className="cursor-pointer relative z-10">Become A Partner →</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-red-400 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+
+
+              </div>
             </div>
-          </div>
 
-          {/* Right Content - Enhanced Circular Design */}
-          <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end w-full lg:w-auto">
-            <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] relative">
-              
-              {/* Outer rotating ring */}
-              <div className="absolute -inset-2 sm:-inset-4 rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 opacity-25 animate-spin" style={{ animationDuration: '20s' }}></div>
+            {/* Right Content - Enhanced Circular Design */}
+            <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end w-full lg:w-auto">
+              <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[400px] lg:h-[400px] xl:w-[450px] xl:h-[450px] relative">
 
-              {/* Main circular background with enhanced gradient and glow */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 opacity-90 shadow-2xl animate-pulse" style={{ animationDuration: '3s' }}>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent"></div>
+                {/* Outer rotating ring */}
+                <div className="absolute -inset-2 sm:-inset-4 rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 opacity-25 animate-spin" style={{ animationDuration: '20s' }}></div>
+
+                {/* Main circular background with enhanced gradient and glow */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 opacity-90 shadow-2xl animate-pulse" style={{ animationDuration: '3s' }}>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/20 to-transparent"></div>
+                </div>
+
+                {/* Glowing ring effect */}
+                <div className="absolute -inset-1 sm:-inset-2 rounded-full bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 opacity-30 blur-xl animate-pulse"></div>
+
+                {/* Central image container with enhanced effects */}
+                <div className="absolute inset-6 sm:inset-8 lg:inset-10 rounded-full bg-white/30 backdrop-blur-2xl border-2 border-white/60 overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-700 group">
+                  <img
+                    src="https://images.pexels.com/photos/8441813/pexels-photo-8441813.jpeg"
+                    alt="Professional using laptop for financial services"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-emerald-500/10"></div>
+                </div>
+
+                {/* Enhanced floating security badge - responsive positioning */}
+                <div className="absolute top-4 sm:top-6 lg:top-10 -right-2 sm:-right-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-2 sm:px-3 lg:px-5 py-1 sm:py-2 lg:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold flex items-center space-x-1 sm:space-x-2 shadow-xl border border-white/30 backdrop-blur-sm hover:scale-110 transition-transform duration-300 float-animation">
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                  <span className="hidden sm:inline">100% Safe & Secure</span>
+                  <span className="sm:hidden">Safe</span>
+                </div>
+
+                {/* Enhanced floating user avatars - responsive sizing */}
+                <div className="absolute top-4 sm:top-6 lg:top-8 left-8 sm:left-12 lg:left-20 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 sm:border-3 border-white flex items-center justify-center shadow-xl overflow-hidden hover:scale-125 transition-transform duration-300" style={{ animation: 'float 4s ease-in-out infinite 1s' }}>
+                  <img
+                    src="https://images.pexels.com/photos/5816286/pexels-photo-5816286.jpeg"
+                    alt="User avatar"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute -inset-1 bg-rose-300/40 rounded-full blur-md"></div>
+                </div>
+
+                <div className="absolute bottom-8 sm:bottom-12 lg:bottom-20 left-4 sm:left-8 lg:left-12 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 sm:border-3 border-white flex items-center justify-center shadow-xl overflow-hidden hover:scale-125 transition-transform duration-300" style={{ animation: 'float 4s ease-in-out infinite 2s' }}>
+                  <img
+                    src="https://images.pexels.com/photos/8292888/pexels-photo-8292888.jpeg"
+                    alt="User avatar"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute -inset-1 bg-blue-300/40 rounded-full blur-md"></div>
+                </div>
+
+                {/* Enhanced floating cursor - responsive sizing */}
+                <div className="absolute bottom-6 sm:bottom-8 lg:bottom-12 right-8 sm:right-12 lg:right-20 w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-white rounded-full shadow-xl flex items-center justify-center hover:scale-125 transition-transform duration-300" style={{ animation: 'float 2s ease-in-out infinite 0.5s' }}>
+                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 bg-gray-700 rounded-full"></div>
+                  <div className="absolute -inset-1 sm:-inset-2 bg-white/40 rounded-full blur-lg"></div>
+                </div>
+
+                {/* Additional floating elements - responsive sizing */}
+                <div className="absolute top-16 sm:top-24 lg:top-32 -left-3 sm:-left-6 lg:-left-8 w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg" style={{ animation: 'float 3s ease-in-out infinite 1.5s' }}></div>
+                <div className="absolute bottom-16 sm:bottom-24 lg:bottom-32 -right-2 sm:-right-4 lg:-right-6 w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-gradient-to-r from-violet-400 to-purple-500 rounded-full shadow-lg" style={{ animation: 'float 4s ease-in-out infinite 0.8s' }}></div>
               </div>
-
-              {/* Glowing ring effect */}
-              <div className="absolute -inset-1 sm:-inset-2 rounded-full bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 opacity-30 blur-xl animate-pulse"></div>
-
-              {/* Central image container with enhanced effects */}
-              <div className="absolute inset-6 sm:inset-8 lg:inset-10 rounded-full bg-white/30 backdrop-blur-2xl border-2 border-white/60 overflow-hidden shadow-2xl hover:scale-105 transition-transform duration-700 group">
-                <img
-                  src="https://images.pexels.com/photos/8441813/pexels-photo-8441813.jpeg"
-                  alt="Professional using laptop for financial services"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-emerald-500/10"></div>
-              </div>
-
-              {/* Enhanced floating security badge - responsive positioning */}
-              <div className="absolute top-4 sm:top-6 lg:top-10 -right-2 sm:-right-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-2 sm:px-3 lg:px-5 py-1 sm:py-2 lg:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold flex items-center space-x-1 sm:space-x-2 shadow-xl border border-white/30 backdrop-blur-sm hover:scale-110 transition-transform duration-300 float-animation">
-                <Shield className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
-                <span className="hidden sm:inline">100% Safe & Secure</span>
-                <span className="sm:hidden">Safe</span>
-              </div>
-
-              {/* Enhanced floating user avatars - responsive sizing */}
-              <div className="absolute top-4 sm:top-6 lg:top-8 left-8 sm:left-12 lg:left-20 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 sm:border-3 border-white flex items-center justify-center shadow-xl overflow-hidden hover:scale-125 transition-transform duration-300" style={{ animation: 'float 4s ease-in-out infinite 1s' }}>
-                <img
-                  src="https://images.pexels.com/photos/5816286/pexels-photo-5816286.jpeg"
-                  alt="User avatar"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute -inset-1 bg-rose-300/40 rounded-full blur-md"></div>
-              </div>
-
-              <div className="absolute bottom-8 sm:bottom-12 lg:bottom-20 left-4 sm:left-8 lg:left-12 w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 sm:border-3 border-white flex items-center justify-center shadow-xl overflow-hidden hover:scale-125 transition-transform duration-300" style={{ animation: 'float 4s ease-in-out infinite 2s' }}>
-                <img
-                  src="https://images.pexels.com/photos/8292888/pexels-photo-8292888.jpeg"
-                  alt="User avatar"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute -inset-1 bg-blue-300/40 rounded-full blur-md"></div>
-              </div>
-
-              {/* Enhanced floating cursor - responsive sizing */}
-              <div className="absolute bottom-6 sm:bottom-8 lg:bottom-12 right-8 sm:right-12 lg:right-20 w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-white rounded-full shadow-xl flex items-center justify-center hover:scale-125 transition-transform duration-300" style={{ animation: 'float 2s ease-in-out infinite 0.5s' }}>
-                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 bg-gray-700 rounded-full"></div>
-                <div className="absolute -inset-1 sm:-inset-2 bg-white/40 rounded-full blur-lg"></div>
-              </div>
-
-              {/* Additional floating elements - responsive sizing */}
-              <div className="absolute top-16 sm:top-24 lg:top-32 -left-3 sm:-left-6 lg:-left-8 w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg" style={{ animation: 'float 3s ease-in-out infinite 1.5s' }}></div>
-              <div className="absolute bottom-16 sm:bottom-24 lg:bottom-32 -right-2 sm:-right-4 lg:-right-6 w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-gradient-to-r from-violet-400 to-purple-500 rounded-full shadow-lg" style={{ animation: 'float 4s ease-in-out infinite 0.8s' }}></div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Custom keyframes for floating animation */}
-      <style jsx>{`
+        {/* Custom keyframes for floating animation */}
+        <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-10px) rotate(5deg); }
@@ -251,7 +243,7 @@ const Home = () => {
           animation: float 3s ease-in-out infinite;
         }
       `}</style>
-    </section>
+      </section>
 
 
       {/* Services */}
@@ -271,7 +263,7 @@ const Home = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className="service-card bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300"
+              className="service-card bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300 h-full"
             >
               <div className="bg-[#FFEDE1] p-4 rounded-full mb-4">
                 <img
@@ -284,8 +276,8 @@ const Home = () => {
                 {service.title}
               </h3>
               <p className="text-gray-600 text-sm mb-4">{service.description}</p>
-               <button
-                className="cursor-pointer bg-[#12B99C] text-white px-5 py-2 rounded-full hover:bg-[#0f4f28] text-sm font-semibold"
+              <button
+                className="cursor-pointer bg-[#12B99C] text-white px-5 py-2 rounded-full hover:bg-[#0f4f28] text-sm font-semibold mt-auto"
                 onClick={() => {
                   switch (service.title) {
                     case "Personal Loan":
@@ -306,33 +298,10 @@ const Home = () => {
                 }}
               >
                 Apply Now
-              </button> 
+              </button>
             </div>
           ))}
         </div>
-
-        {/* <div className="flex justify-center items-center mt-12">
-          <button
-            onClick={() => navigate("/services")}
-            className="cursor-pointer flex items-center gap-2 bg-[#12B99C] text-white px-8 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-[#0f4f28] hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-transparent"
-          >
-            More Services
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </button>
-        </div> */}
       </section>
 
 
@@ -361,12 +330,13 @@ const Home = () => {
             <p className="text-gray-600 text-lg leading-relaxed">
               Partner with us to unlock new financial growth opportunities. As a trusted associate, you’ll help clients reach their goals while earning generous rewards.
             </p>
-            <p className="text-2xl text-gray-900 font-bold">
+            <p className="text-2xl text-gray-900 font-bold leading-snug">
               Earn up to <span style={{ color: '#12B99C' }} className="font-extrabold">₹1,00,000</span> per month by becoming a trusted financial partner.
             </p>
+            
             <button
-             onClick={() => { navigate('/PartnerRegistrationForm'); }}
-             className="mt-6 px-10 py-4 text-white text-lg font-bold rounded-full shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-xl duration-300" style={{ backgroundColor: '#12B99C', hover: { backgroundColor: '#0e9c7d' } }}>
+              onClick={() => { navigate('/PartnerRegistrationForm'); }}
+              className="mt-6 px-10 py-4 text-white text-lg font-bold rounded-full shadow-lg transition-all transform hover:-translate-y-1 hover:shadow-xl duration-300" style={{ backgroundColor: '#12B99C', hover: { backgroundColor: '#0e9c7d' } }}>
               Join Now
             </button>
           </div>
@@ -590,3 +560,6 @@ const Home = () => {
 };
 
 export default Home;
+
+
+

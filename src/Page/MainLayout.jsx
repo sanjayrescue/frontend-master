@@ -2,6 +2,7 @@ import Home from './Home'
 import React, { useState, useEffect } from "react";
 import { Menu, X, ChevronDown, Phone, Mail, Clock } from "lucide-react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png'
@@ -27,11 +28,9 @@ const MainLayout = () => {
 
   ];
 
-  // Effect to set the current path on component mount
   useEffect(() => {
     setCurrentPath(window.location.pathname);
   }, []);
-
 
   return (
 
@@ -222,7 +221,7 @@ const MainLayout = () => {
 
 
       <footer className="bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 text-white pt-12 pb-6 px-4 sm:px-10 overflow-hidden">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
 
           {/* About Us */}
           <div>
@@ -243,16 +242,48 @@ const MainLayout = () => {
             </ul>
           </div>
 
-          {/* Legal Links */}
-          <div>
-            <h2 className="text-xl font-bold mb-4 text-[#12B99C]">Documents & Legal</h2>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li><a href="/Documents" className="hover:text-[#12B99C] transition">Documents List</a></li>
-              <li><a href="/TermsConditions" className="hover:text-[#12B99C] transition">Terms & Conditions</a></li>
-              <li><a href="/PrivacyPolicy" className="hover:text-[#12B99C] transition">Privacy Policy</a></li>
-              {/* <li><a href="#" className="hover:text-[#12B99C] transition">Disclaimer</a></li> */}
-            </ul>
-          </div>
+   <div>
+ <h2 className="text-xl font-bold mb-4 text-[#12B99C]">Social Links</h2>
+ <div className="mt-6">
+             
+              <div className="flex items-center gap-4">
+
+                <a
+                  href="https://www.facebook.com/profile.php?id=61578373723382"
+                  target="_blank"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-400 hover:border-[#12B99C] hover:text-[#12B99C] transition"
+                >
+                  <FaFacebookF size={18} />
+                </a>
+
+                <a
+                  href="https://www.instagram.com/trustline_fintech"
+                  target="_blank"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-400 hover:border-[#12B99C] hover:text-[#12B99C] transition"
+                >
+                  <FaInstagram size={20} />
+                </a>
+
+                <a
+                  href="https://wa.me/918766681450"
+                  target="_blank"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-400 hover:border-[#12B99C] hover:text-[#12B99C] transition"
+                >
+                  <FaWhatsapp size={20} />
+                </a>
+
+              </div>
+            </div>
+ </div>
+          {/* Legal */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-[#12B99C]">Documents & Legal</h2>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li><a href="/Documents" className="hover:text-[#12B99C]">Documents List</a></li>
+                <li><a href="/TermsConditions" className="hover:text-[#12B99C]">Terms & Conditions</a></li>
+                <li><a href="/PrivacyPolicy" className="hover:text-[#12B99C]">Privacy Policy</a></li>
+                </ul>
+            </div>
 
           {/* Contact */}
           <div>
@@ -289,4 +320,4 @@ const MainLayout = () => {
   )
 }
 
-export default MainLayout
+export default MainLayout;
