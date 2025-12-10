@@ -139,9 +139,9 @@ const Channelpartner = () => {
 
   return (
     <div>
-      <section className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
+      <section className="mx-auto mt-10">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold text-gray-800">
             Channel Partner
           </h1>
         </div>
@@ -149,13 +149,13 @@ const Channelpartner = () => {
 
       {/* <ChannelPartnerHero /> */}
 
-      <section className="py-20 px-4">
+      <section className="py-15 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-5">
-          <h1 className="text-5xl font-bold text-black mb-4 leading-tight">
-            Become <span className="text-[#12B99C]">Trustline Fintech</span> Partner <br />
-            <span className="text-[#12B99C]">Trustline Fintech</span> के Partner बने
-          </h1>
+            <h1 className="text-5xl font-bold text-black mb-4 leading-tight">
+              Become <span className="text-[#12B99C]">Trustline Fintech</span> Partner <br />
+              <span className="text-[#12B99C]">Trustline Fintech</span> के Partner बने
+            </h1>
 
             <p className="text-xl text-black max-w-2xl mx-auto">
               Join India's leading financial service provider and help people access loans, credit cards, and more with ease.
@@ -173,14 +173,14 @@ const Channelpartner = () => {
               Join Now
             </button>
 
-            <div className="bg-gradient-to-r from-[#12B99C] to-[#12B99C] rounded-full animate-pulse p-1 mt-20"></div>
+            <div className="bg-gradient-to-r from-[#12B99C] to-[#12B99C] rounded-full animate-pulse p-1 mt-15"></div>
           </div>
         </div>
       </section>
 
       {/* <ChannelPartnerOpportunities /> */}
 
-      <section className="py-6 px-6 md:px-16 bg-white text-gray-800">
+      <section className="md:px-14 bg-white text-gray-800 py-0">
         <div className="text-center mb-12">
           <h2 className="text-6xl font-bold text-gray-900">
             Big-Revenue Business Opportunity
@@ -192,8 +192,7 @@ const Channelpartner = () => {
 
         <div className="bg-[#12B99C] text-white px-6 py-4 text-center rounded-md mb-10">
           <p className="text-lg font-medium">
-            Channel Partner Plan – Loaded With Business-Centric Perks | चैनल
-            पार्टनर योजना – व्यवसाय-केंद्रित सुविधाओं से भरपूर
+            Channel Partner Plan – Loaded With Business-Centric Perks | चैनल पार्टनर योजना – व्यवसाय-केंद्रित सुविधाओं से भरपूर
           </p>
         </div>
 
@@ -204,13 +203,9 @@ const Channelpartner = () => {
               className="bg-[#f9f9f9] hover:shadow-xl transition duration-300 rounded-xl p-6 border border-[#12B99C]"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="font-semibold text-lg text-gray-800">
-                {feature.title}
-              </h3>
+              <h3 className="font-semibold text-lg text-gray-800">{feature.title}</h3>
               <p className="text-[#166534] text-sm mb-2">{feature.hindiTitle}</p>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {feature.desc}
-              </p>
+              <p className="text-gray-600 text-sm leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>
@@ -294,31 +289,32 @@ const Channelpartner = () => {
             {testimonials.map((testimonial, idx) => (
               <div
                 key={idx}
-                className="bg-white p-8 rounded-3xl shadow-xl border border-gray-200 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] transform"
+                className="bg-white p-8 rounded-3xl shadow-xl border border-gray-200 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] transform flex flex-col justify-between"
               >
-                {/* Quote icon */}
-                <div className="flex justify-between items-start mb-6">
-                  <Quote size={48} className="text-gray-200" />
+                <div>
+                  {/* Quote icon */}
+                  <div className="flex justify-between items-start mb-6">
+                    <Quote size={48} className="text-gray-200" />
+                  </div>
+
+                  {/* English feedback */}
+                  <p className="text-lg text-gray-800 leading-relaxed italic mb-4">
+                    "{testimonial.feedback}"
+                  </p>
+
+                  {/* Hindi feedback */}
+                  <p className="text-sm text-gray-500 font-light mb-6">
+                    "{testimonial.hindiFeedback}"
+                  </p>
                 </div>
 
-                {/* English feedback */}
-                <p className="text-lg text-gray-800 leading-relaxed italic mb-4">
-                  "{testimonial.feedback}"
-                </p>
-
-                {/* Hindi feedback */}
-                <p className="text-sm text-gray-500 font-light mb-6">
-                  "{testimonial.hindiFeedback}"
-                </p>
-
                 {/* Partner name and title */}
-                <div className="text-left">
-                  <p className="font-bold text-[#12B99C] text-lg">
-                    {testimonial.name}
-                  </p>
+                <div className="mt-4 text-left">
+                  <p className="font-bold text-[#12B99C] text-lg">{testimonial.name}</p>
                   <p className="text-sm text-gray-500">{testimonial.title}</p>
                 </div>
               </div>
+
             ))}
           </div>
         </div>

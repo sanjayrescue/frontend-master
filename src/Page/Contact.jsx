@@ -124,11 +124,11 @@ const Contact = () => {
     );
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-12 px-4 mt-20 ">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-12 px-4">
     <section className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">
           Contact <span className="text-[#12B99C]">Trustline Fintech</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">

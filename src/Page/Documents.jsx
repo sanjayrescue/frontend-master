@@ -60,9 +60,9 @@ const Documents = () => {
   ];
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 py-12 px-4 mt-20">
+    <section className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-12 px-4">
       <div className="max-w-7xl mx-auto text-center mb-16">
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
+        <h1 className="text-5xl font-bold text-gray-800 mb-6">
           Documents List
         </h1>
         <p className="text-xl text-gray-600">

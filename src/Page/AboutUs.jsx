@@ -27,25 +27,10 @@ const AboutUs = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
-      {/* Header */}
-      <header className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Building className="h-8 w-8 text-[#12B99C]" />
-            <span className="text-2xl font-bold text-gray-900">Trustline Fintech</span>
-          </div>
-            <button className="bg-[#12B99C] hover:bg-[#0f9d86] text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-              Get Started
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-15 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
             We Are <span className="text-[#12B99C]">Trustline Fintech</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-4xl mx-auto">
