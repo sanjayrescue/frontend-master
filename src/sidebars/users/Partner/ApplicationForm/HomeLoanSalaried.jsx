@@ -205,6 +205,7 @@ export default function HomeLoanSalaried() {
 
     // Personal fields
     if (!formData.firstName) errors.firstName = "First name is required.";
+    if(!formData.middleName) errors.middleName = "Middle name is required";
     if (!formData.lastName) errors.lastName = "Last name is required.";
     if (!formData.motherName) errors.motherName = "Mother's name is required.";
     if (!formData.pan) errors.pan = "PAN number is required.";

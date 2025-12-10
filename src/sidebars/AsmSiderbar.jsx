@@ -35,6 +35,7 @@ import { getAuthData, clearAuthData } from "../utils/localStorage";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAsmProfile } from "../feature/thunks/asmThunks";
 import Profile from "./users/userProfile/Profile";
+import logo from "../assets/logo.png";
 
 // Mock data for notifications
 const mockNotifications = [
@@ -232,8 +233,10 @@ const AsmSiderbar = () => {
         {/* Logo */}
         <div className="flex items-center justify-center py-6 border-b border-gray-100">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r bg-teal-500  rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">T</span>
+          <div className="w-10 h-10  rounded-lg flex items-center justify-center ">
+              <span className="text-white font-bold text-lg">
+                <img src={logo} alt="logo" />
+              </span>
             </div>
             {sidebarOpen && (
               <span className="text-xl font-bold text-gray-800 tracking-wide">
