@@ -127,7 +127,8 @@ const navigate = useNavigate();
                
                 <div className={`h-1 bg-gradient-to-r ${service.gradient}`}></div>
                
-                <div className="p-6">
+                <div className="p-6 flex flex-col h-full justify-between">
+
                  
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-r ${service.gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
