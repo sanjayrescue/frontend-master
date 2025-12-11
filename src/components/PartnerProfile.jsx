@@ -63,7 +63,7 @@ const PartnerProfile = () => {
       console.log("JWT token:", partnerToken);
   
       const response = await axios.post(
-        "http://localhost:5000/api/auth/change-password",
+        `${backendurl}/auth/change-password`,
         {
           oldPassword: settingsForm.currentPassword,
           newPassword: settingsForm.password,

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -32,6 +33,7 @@ const PartnerRegistrationForm = () => {
   const selfieInputRef = useRef(null);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -69,9 +71,11 @@ const PartnerRegistrationForm = () => {
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
+    const nextValue =
+      type === "file" ? files[0] : name === "panNumber" ? value.toUpperCase() : value;
     setFormData({
       ...formData,
-      [name]: type === "file" ? files[0] : value,
+      [name]: nextValue,
     });
   };
 
@@ -152,6 +156,15 @@ const PartnerRegistrationForm = () => {
       return showError("Aadhaar, PAN and Selfie files are required");
     }
 
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const oversized =
+      (formData.adharCard && formData.adharCard.size > maxFileSize) ||
+      (formData.panCard && formData.panCard.size > maxFileSize) ||
+      (formData.selfie && formData.selfie.size > maxFileSize);
+    if (oversized) {
+      return showError("Each file must be 5MB or less");
+    }
+
     const newFormData = {
       firstName: formData.firstName,
       middleName: formData.middleName || null,
@@ -203,6 +216,7 @@ const PartnerRegistrationForm = () => {
       );
       setShowPopup(true);
       resetFields();
+      setTimeout(() => navigate("/LoginPage"), 800);
     } catch (err) {
       const backendMsg =
         err?.message ||
@@ -453,8 +467,8 @@ const PartnerRegistrationForm = () => {
                         name="panNumber"
                         value={formData.panNumber || ""}
                         onChange={handleChange}
-                        placeholder="Enter your PAN number"
-                        className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white/50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200 uppercase"
+                        placeholder="Enter your PAN (e.g., Abcde1234f)"
+                        className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white/50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200"
                         required
                         maxLength={10}
                         pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
@@ -613,7 +627,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-emerald-500" />
-                    Aadhaar Card
+                    Aadhaar Card <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -642,12 +656,13 @@ const PartnerRegistrationForm = () => {
                         ? formData.adharCard.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-emerald-500" />
-                    PAN Card
+                    PAN Card <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -676,12 +691,13 @@ const PartnerRegistrationForm = () => {
                         ? formData.panCard.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <User className="w-4 h-4 text-emerald-500" />
-                    Selfie Photo
+                    Selfie Photo <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -710,6 +726,7 @@ const PartnerRegistrationForm = () => {
                         ? formData.selfie.name
                         : "No file selected"}
                     </span>
+                    <span className="text-xs text-slate-500">Max 5MB</span>
                   </div>
                 </div>
               </div>
@@ -733,7 +750,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-500" />
-                    Bank Name
+                    Bank Name <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -748,7 +765,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-emerald-500" />
-                    Account Number
+                    Account Number <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -763,7 +780,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-500" />
-                    IFSC Code
+                    IFSC Code <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
