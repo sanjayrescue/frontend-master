@@ -71,9 +71,11 @@ const PartnerRegistrationForm = () => {
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
+    const nextValue =
+      type === "file" ? files[0] : name === "panNumber" ? value.toUpperCase() : value;
     setFormData({
       ...formData,
-      [name]: type === "file" ? files[0] : value,
+      [name]: nextValue,
     });
   };
 
@@ -465,8 +467,8 @@ const PartnerRegistrationForm = () => {
                         name="panNumber"
                         value={formData.panNumber || ""}
                         onChange={handleChange}
-                        placeholder="Enter your PAN (e.g., ABCDE1234F)"
-                        className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white/50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200 uppercase"
+                        placeholder="Enter your PAN (e.g., Abcde1234f)"
+                        className="w-full p-4 border-2 border-gray-200 rounded-xl bg-white/50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200"
                         required
                         maxLength={10}
                         pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
@@ -625,7 +627,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-emerald-500" />
-                    Aadhaar Card
+                    Aadhaar Card <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -660,7 +662,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-emerald-500" />
-                    PAN Card
+                    PAN Card <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -695,7 +697,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative group">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <User className="w-4 h-4 text-emerald-500" />
-                    Selfie Photo
+                    Selfie Photo <span className="text-emerald-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -748,7 +750,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-500" />
-                    Bank Name
+                    Bank Name <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -763,7 +765,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-emerald-500" />
-                    Account Number
+                    Account Number <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -778,7 +780,7 @@ const PartnerRegistrationForm = () => {
                 <div className="relative">
                   <label className=" text-slate-700 font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-emerald-500" />
-                    IFSC Code
+                    IFSC Code <span className="text-emerald-600">*</span>
                   </label>
                   <input
                     type="text"
