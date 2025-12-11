@@ -23,7 +23,7 @@ import { backendurl } from "../../../../feature/urldata";
 
 export default function BusinessLoan() {
   const defaultReferralCode = 'PT-D4CTD8B2'
-
+ 
   const { partnerToken } = getAuthData();
   const isPartnerLoggedIn = Boolean(partnerToken);
 
@@ -213,295 +213,136 @@ export default function BusinessLoan() {
     }
   };
 
-  function validateForm(formData, sameAddress) {
-    const errors = [];
-  
-    // Personal info
-    if (!formData.firstName) errors.push("First name is required.");
-    if (!formData.lastName) errors.push("Last name is required.");
-    if (!formData?.phone) {
-      errors.push("Phone number is required.");
-    } else if (!/^\d{10}$/.test(formData?.phone)) {
-      errors.push("Phone number must be exactly 10 digits.");
-    }
-    if (!formData.email) errors.push("Email is required.");
-    if (!formData.gender) errors.push("Gender is required.");
-    if (!formData.maritalStatus) errors.push("Marital status is required.");
-  
-    if (formData.maritalStatus === "married" && !formData.SpouseName) {
-      errors.push("Spouse name is required for married applicants.");
-    }
-  
-    // Current address
-    if (
-      !formData.currentAddress ||
-      !formData.currentAddressPincode ||
-      !formData.currentAddressOwnRented ||
-      !formData.currentAddressStability
-    ) {
-      errors.push("All current address fields are required.");
-    }
-  
-    // At least one proof
-    if (!formData.lightBill && !formData.utilityBill && !formData.rentAgreement) {
-      errors.push(
-        "At least one address proof is required (Light bill / Utility bill / Rent Agreement)."
-      );
-    }
-  
-    // Permanent address if not same
-    if (
-      !sameAddress &&
-      (!formData.permanentAddress ||
-        !formData.permanentAddressPincode ||
-        !formData.permanentAddressOwnRented ||
-        !formData.permanentAddressStability)
-    ) {
-      errors.push("All permanent address fields are required.");
-    }
-  
-    // Business info
-    if (!formData.businessName) errors.push("Business name is required.");
-    if (!formData.businessAddress) errors.push("Business address is required.");
-    if (!formData.businessVintage)
-      errors.push("Business vintage is required.");
-  
-    // Female applicant -> co-applicant docs
-    if (formData.gender === "female") {
-      if (!formData.coApplicantAadharFront)
-        errors.push("Co-applicant Aadhar front is required.");
-      if (!formData.coApplicantAadharBack)
-        errors.push("Co-applicant Aadhar back is required.");
-      if (!formData.coApplicantPan)
-        errors.push("Co-applicant PAN is required.");
-      if (!formData.coApplicantMobile)
-        errors.push("Co-applicant mobile is required.");
-      else if (!/^\d{10}$/.test(formData.coApplicantMobile)) {
-        errors.push("Co-applicant mobile must be exactly 10 digits.");
-      }
-      if (!formData.coApplicantSelfie)
-        errors.push("Co-applicant selfie is required.");
-    }
-  
-    // References
-    if (!formData.reference1Name) errors.push("Reference 1 name is required.");
-    if (!formData.reference1Contact)
-      errors.push("Reference 1 contact is required.");
-    else if (!/^\d{10}$/.test(formData.reference1Contact)) {
-      errors.push("Reference 1 contact must be exactly 10 digits.");
-    }
-  
-    if (!formData.reference2Name) errors.push("Reference 2 name is required.");
-    if (!formData.reference2Contact)
-      errors.push("Reference 2 contact is required.");
-    else if (!/^\d{10}$/.test(formData.reference2Contact)) {
-      errors.push("Reference 2 contact must be exactly 10 digits.");
-    }
-  
-    return errors;
-  }
-  
-  
+ 
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError("");
+ 
+function validateForm(formData) {
+  const errors = {};
+
+  if (!formData.firstName) errors.firstName = "First name is required.";
+  if (!formData.lastName) errors.lastName = "Last name is required.";
+  if (!formData.motherName) errors.motherName = "Mother name is required.";
+  if (!formData.panNumber) errors.panNumber = "PAN Number is required.";
+  if (!formData.phone) {
+    errors.phone = "Phone number is required.";
+  } else if (!/^\d{10}$/.test(formData.phone)) {
+    errors.phone = "Phone number must be exactly 10 digits.";
+  }
+
+  if (!formData.email) errors.email = "Email is required.";
+  if (!formData.gender) errors.gender = "Gender is required.";
+  if (!formData.maritalStatus) errors.maritalStatus = "Marital status is required.";
+
+
+  // Address Information........
+  if (!formData.currentAddress) errors.currentAddress = "current Address is required.";
+
+  if (!formData.currentAddressPincode) errors.currentAddressPincode = "Pincode is required.";
+
+  if (!formData.currentAddressOwnRented) errors.currentAddressOwnRented = " Own Rented is required.";
+
+  if (!formData.currentAddressStability) errors.currentAddressStability = "Address Stability is required.";
+
+  // Permanent Address Info....
+  if (!formData.permanentAddress) errors.permanentAddress = "permanent Address is required.";
+
+  if (!formData.permanentAddressPincode) errors.permanentAddressPincode = "Pincode is required.";
+
+  if (!formData.permanentAddressOwnRented) errors.permanentAddressOwnRented = "own/ Rented is required.";
+
+  if (!formData.permanentAddressStability) errors.permanentAddressStability = " Address Stability is required.";
+
+
+
+  // Loan Deatils..........
+
+  if (!formData.loanAmount) errors.loanAmount = "loan Amount is required.";
+
+  // Personal Documents.......
+  if (!formData.panCard) errors.panCard = "PAN Card is required.";
+
+  if (!formData.selfie) errors.selfie = "Selfie  is required.";
+
+  // Business Information...
+
+  if (!formData.businessName) errors.businessName = "Business Name is required.";
+
+  if (!formData.businessVintage) errors.businessVintage = "Business Vintage is required.";
+
+  if (!formData.businessAddress) errors.businessAddress = "Business Address is required.";
+
+  if (!formData.annualTurnover) errors.annualTurnover = "Annual Turnover is required.";
+
+  // Business Documents...
+
+  if (!formData.shopAct) errors.shopAct = "Shop Act is required.";
+
+  if (!formData.udhyamAadhar) errors.udhyamAadhar = "Udhyam Aadhar is required.";
+
+  if (!formData.itr) errors.itr = "ITR is required.";
+
+  if (!formData.shopPhoto) errors.shopPhoto = "Shop Photo is required.";
+
+  // Financial Documents....
+
+  if (!formData.bankStatementFile1) errors.bankStatementFile1 = "Bank Statement File 1 is required.";
+
+   // References
+   if (!formData.reference1Name) errors.reference1Name = "Reference 1 name is required.";
+   if (!formData.reference1Contact) {
+     errors.reference1Contact = "Reference 1 contact is required.";
+   } else if (!/^\d{10}$/.test(formData.reference1Contact)) {
+     errors.reference1Contact = "Reference 1 contact must be exactly 10 digits.";
+   }
+
+   if (!formData.reference2Name) errors.reference2Name = "Reference 2 name is required.";
+   if (!formData.reference2Contact) {
+     errors.reference2Contact = "Reference 2 contact is required.";
+   } else if (!/^\d{10}$/.test(formData.reference2Contact)) {
+     errors.reference2Contact = "Reference 2 contact must be exactly 10 digits.";
+   }
+
+  return errors;
+}
+
+
+const handleSubmit = async () => {
+  console.log("working");
+  
+  setLoading(true);
+  setError("");
   setValidationErrors([]);
   setSuccessMessage("");
   setSavedApplication(null);
-    try {
-      const errors = validateForm(formData, sameAddress);
-      if (errors.length > 0) {
-      setValidationErrors(errors);
+
+  try {
+   
+
+      const errors = validateForm(formData);
+
+if (Object.keys(errors).length > 0) {
+  setValidationErrors(errors);
+  setLoading(false);
+  return;
+
+
+    }
+
+    // If API/general error already exists
+    if (error) {
+      setValidationErrors([error]);
       setLoading(false);
       return;
     }
- if (error) {
-  setValidationErrors([error]);
-  setLoading(false);
-  return;
-    }
 
-      // Build nested JSON structure
-      const applicationData = {
-        partnerReferralCode: isPartnerLoggedIn
-          ? undefined
-          : formData.partnerReferralCode?.trim() || undefined,
-        customer: {
-          firstName: formData.firstName,
-          middleName: formData.middleName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          alternatePhone: formData.alternateContact,
-          gender: formData.gender,
-          motherName: formData.motherName,
-          maritalStatus: formData.maritalStatus,
-          SpouseName: formData.SpouseName,
-          panNumber: formData.panNumber,
-          loanAmount: formData.loanAmount || 0,
-          currentAddress: formData.currentAddress,
-          currentAddressPincode: formData.currentAddressPincode,
-          currentAddressOwnRented: formData.currentAddressOwnRented,
-          currentAddressStability: formData.currentAddressStability,
-          currentAddressLandmark: formData.currentAddressLandmark,
-          permanentAddress: formData.permanentAddress,
-          permanentAddressPincode: formData.permanentAddressPincode,
-          permanentAddressOwnRented: formData.permanentAddressOwnRented,
-          permanentAddressStability: formData.permanentAddressStability,
-          permanentAddressLandmark: formData.permanentAddressLandmark,
-        },
-        product: {
-          businessName: formData.businessName,
-          businessAddress: formData.businessAddress,
-          businessLandmark: formData.businessLandmark,
-          businessVintage: formData.businessVintage,
-          gstNumber: formData.gstNumber,
-          annualTurnoverInINR: formData.annualTurnover,
-        },
-        loanType: "BUSINESS",
-        references: [
-          {
-            name: formData.reference1Name,
-            relation: "Reference 1",
-            phone: formData.reference1Contact,
-          },
-          {
-            name: formData.reference2Name,
-            relation: "Reference 2",
-            phone: formData.reference2Contact,
-          },
-        ],
-        coApplicant:
-          formData.gender === "female"
-            ? {
-                aadharFront: formData.coApplicantAadharFront,
-                aadharBack: formData.coApplicantAadharBack,
-                panCard: formData.coApplicantPan,
-                phone: formData.coApplicantMobile,
-                selfie: formData.coApplicantSelfie,
-              }
-            : undefined,
-      };
-
-      // Prepare FormData with ordered docs/docTypes
-      const formDataToSend = new FormData();
-      formDataToSend.append("data", JSON.stringify(applicationData));
-
-      const docsQueue = [];
-      if (formData.aadharFront)
-        docsQueue.push({ file: formData.aadharFront, type: "AADHAR_FRONT" });
-      if (formData.aadharBack)
-        docsQueue.push({ file: formData.aadharBack, type: "AADHAR_BACK" });
-      if (formData.panCard)
-        docsQueue.push({ file: formData.panCard, type: "PAN" });
-      if (formData.lightBill)
-        docsQueue.push({ file: formData.lightBill, type: "LIGHT_BILL" });
-      if (formData.utilityBill)
-        docsQueue.push({ file: formData.utilityBill, type: "UTILITY_BILL" });
-      if (formData.rentAgreement)
-        docsQueue.push({
-          file: formData.rentAgreement,
-          type: "RENT_AGREEMENT",
-        });
-      if (formData.shopAct)
-        docsQueue.push({ file: formData.shopAct, type: "SHOP_ACT" });
-      if (formData.udhyamAadhar)
-        docsQueue.push({ file: formData.udhyamAadhar, type: "UDHYAM_AADHAR" });
-      if (formData.itr) docsQueue.push({ file: formData.itr, type: "ITR" });
-      if (formData.gstDoc)
-        docsQueue.push({ file: formData.gstDoc, type: "GST" });
-      if (formData.businessOtherDocs)
-        docsQueue.push({
-          file: formData.businessOtherDocs,
-          type: "BUSINESS_OTHER_DOCS",
-        });
-      if (formData.shopPhoto)
-        docsQueue.push({ file: formData.shopPhoto, type: "SHOP_PHOTO" });
-      if (formData.bankStatementFile1)
-        docsQueue.push({
-          file: formData.bankStatementFile1,
-          type: "BANK_STATEMENT_1",
-        });
-      if (formData.bankStatementFile2)
-        docsQueue.push({
-          file: formData.bankStatementFile2,
-          type: "BANK_STATEMENT_2",
-        });
-      if (formData.selfie)
-        docsQueue.push({ file: formData.selfie, type: "SELFIE" });
-
-      // Co-applicant documents for female applicants
-      if (formData.gender === "female") {
-        if (formData.coApplicantAadharFront)
-          docsQueue.push({
-            file: formData.coApplicantAadharFront,
-            type: "CO_APPLICANT_AADHAR_FRONT",
-          });
-        if (formData.coApplicantAadharBack)
-          docsQueue.push({
-            file: formData.coApplicantAadharBack,
-            type: "CO_APPLICANT_AADHAR_BACK",
-          });
-        if (formData.coApplicantPan)
-          docsQueue.push({
-            file: formData.coApplicantPan,
-            type: "CO_APPLICANT_PAN",
-          });
-        if (formData.coApplicantSelfie)
-          docsQueue.push({
-            file: formData.coApplicantSelfie,
-            type: "CO_APPLICANT_SELFIE",
-          });
-      }
-
-      docsQueue.forEach(({ file, type }) => {
-        formDataToSend.append("docs", file);
-        formDataToSend.append("docTypes", type);
-      });
-
-
-      if(!checkFileSize(docsQueue)){
+   
+    setSuccessMessage("Application submitted successfully!");
+  } catch (err) {
+    setError("Something went wrong. Please try again.");
+  } finally {
     setLoading(false);
-    return ;
-      }
-
-
-
-
-      const endpoint = isPartnerLoggedIn
-        ? `${backendurl}/partner/create-applications`
-        : `${backendurl}/partner/public/create-application`;
-
-      const headers = isPartnerLoggedIn
-        ? {
-            Authorization: `Bearer ${partnerToken}`,
-            "Content-Type": "multipart/form-data",
-          }
-        : {
-            "Content-Type": "multipart/form-data",
-          };
-
-      const response = await axios.post(endpoint, formDataToSend, {
-        headers,
-      });
-      const data = response.data;
-
-      setApplicationId(data.id);
-  setSavedApplication(data);
-  setSuccessMessage(
-    data.message || "Application saved successfully. You can submit now."
-  );
-  setModalOpen(true);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Something went wrong."
-      );
-  setValidationErrors(err.response?.data?.errors || []);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }
+};
 
   const handleApplyNow = async () => {
     if (!applicationId) return;
@@ -632,6 +473,14 @@ export default function BusinessLoan() {
     return true; // All files are valid
   };
 
+  const renderError = (field) => {
+    return validationErrors[field] ? (
+      <p className="text-red-500 text-sm mt-1">{validationErrors[field]}</p>
+    ) : null;
+  };
+  
+
+
   return (
     <div
       className="min-h-screen py-8 px-4"
@@ -706,6 +555,7 @@ export default function BusinessLoan() {
                     placeholder="Enter your first name"
                     required
                   />
+                   {renderError("firstName")}
                 </div>
                 {/* Middle Name */}
                 <div>
@@ -749,6 +599,7 @@ export default function BusinessLoan() {
                     placeholder="Enter your last name"
                     required
                   />
+                  {renderError("lastName")}
                 </div>
                 {/* Mother Name */}
                 <div>
@@ -771,6 +622,7 @@ export default function BusinessLoan() {
                     placeholder="Enter your mother's name"
                     required
                   />
+                  {renderError("motherName")}
                 </div>
                 {/* PAN Number */}
                 <div>
@@ -793,6 +645,7 @@ export default function BusinessLoan() {
                     placeholder="Enter your PAN number"
                     required
                   />
+                   {renderError("panNumber")}
                 </div>
                 {/* Gender */}
                 <div>
@@ -818,6 +671,7 @@ export default function BusinessLoan() {
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                   </select>
+                  {renderError("gender")}
                 </div>
                 {/* Marital Status */}
                 <div>
@@ -843,6 +697,7 @@ export default function BusinessLoan() {
                     <option value="married">Married</option>
                     <option value="other">Other</option>
                   </select>
+                  {renderError("maritalStatus")}
                 </div>
                 {/* Password fields removed as not required here */}
                 {/* Contact Number */}
@@ -871,6 +726,7 @@ export default function BusinessLoan() {
                       placeholder="Enter your contact number"
                       required
                     />
+                     {renderError("phone")}
                   </div>
                 </div>
                 {/* Alternate Contact */}
@@ -926,6 +782,7 @@ export default function BusinessLoan() {
                       placeholder="Enter your email address"
                       required
                     />
+                     {renderError("email")}
                   </div>
                 </div>
                 {/* Referral moved to end */}
@@ -999,6 +856,7 @@ export default function BusinessLoan() {
                         placeholder="Enter your current address"
                         required
                       />
+                       {renderError("currentAddress")}
                     </div>
                     <div>
                       <label
@@ -1020,6 +878,7 @@ export default function BusinessLoan() {
                         placeholder="Enter pincode"
                         required
                       />
+                       {renderError("currentAddressPincode")}
                     </div>
                     <div>
                       <label
@@ -1043,6 +902,7 @@ export default function BusinessLoan() {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
+                      {renderError("currentAddressOwnRented")}
                     </div>
                     <div>
                       <label
@@ -1064,6 +924,7 @@ export default function BusinessLoan() {
                         placeholder="e.g., 2 years"
                         required
                       />
+                        {renderError("currentAddressStability")}
                     </div>
                     <div>
                       <label
@@ -1140,6 +1001,7 @@ export default function BusinessLoan() {
                         disabled={sameAddress}
                         required
                       />
+                       {renderError("permanentAddress")}
                     </div>
                     <div>
                       <label
@@ -1162,6 +1024,7 @@ export default function BusinessLoan() {
                         disabled={sameAddress}
                         required
                       />
+                      {renderError("permanentAddressPincode")}
                     </div>
                     <div>
                       <label
@@ -1186,6 +1049,7 @@ export default function BusinessLoan() {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
+                      {renderError("permanentAddressOwnRented")}
                     </div>
                     <div>
                       <label
@@ -1208,6 +1072,7 @@ export default function BusinessLoan() {
                         disabled={sameAddress}
                         required
                       />
+                       {renderError("permanentAddressStability")}
                     </div>
                     <div>
                       <label
@@ -1271,6 +1136,7 @@ export default function BusinessLoan() {
                     min="0"
                     required
                   />
+                  {renderError("loanAmount")}
                 </div>
               </div>
             </section>
@@ -1541,6 +1407,7 @@ export default function BusinessLoan() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                   {renderError("panCard")}
                 </div>
                 {/* Selfie Upload */}
                 <div>
@@ -1574,6 +1441,8 @@ export default function BusinessLoan() {
                         <X className="w-5 h-5" />
                       </button>
                     )}
+                     {renderError("selfie")}
+
                   </div>
                   {formData.selfie && (
                     <p className="text-xs mt-1 text-green-600 flex items-center gap-1">
@@ -1746,6 +1615,7 @@ export default function BusinessLoan() {
                       placeholder="Enter your business name"
                       required
                     />
+                      {renderError("businessName")}
                   </div>
                 </div>
                 <div>
@@ -1769,6 +1639,7 @@ export default function BusinessLoan() {
                     min="0"
                     required
                   />
+                    {renderError("businessVintage")}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1790,6 +1661,7 @@ export default function BusinessLoan() {
                     placeholder="Enter your business address"
                     required
                   />
+                    {renderError("businessAddress")}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1867,6 +1739,7 @@ export default function BusinessLoan() {
                       placeholder="Enter annual turnover in INR"
                       required
                     />
+                      {renderError("annualTurnover")}
                   </div>
                 </div>
               </div>
@@ -1901,6 +1774,7 @@ export default function BusinessLoan() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                    {renderError("shopAct")}
                 </div>
                 <div>
                   <label
@@ -1921,6 +1795,7 @@ export default function BusinessLoan() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                     {renderError("udhyamAadhar")}
                 </div>
                 <div>
                   <label
@@ -1941,6 +1816,7 @@ export default function BusinessLoan() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                    {renderError("itr")}
                 </div>
                 <div>
                   <label
@@ -1985,6 +1861,7 @@ export default function BusinessLoan() {
                       accept=".jpg,.jpeg,.png"
                       required
                     />
+                       {renderError("shopPhoto")}
                   </div>
                 </div>
                 <div>
@@ -2044,6 +1921,7 @@ export default function BusinessLoan() {
                   >
                     Upload last 12 months bank statement
                   </p>
+                  {renderError("bankStatementFile1")}
                 </div>
                 <div>
                   <label
@@ -2108,6 +1986,7 @@ export default function BusinessLoan() {
                         placeholder="Enter reference name"
                         required
                       />
+                      {renderError("reference1Name")}
                     </div>
                     <div>
                       <label
@@ -2134,6 +2013,7 @@ export default function BusinessLoan() {
                           placeholder="Enter contact number"
                           required
                         />
+                        {renderError("reference1Contact")}
                       </div>
                     </div>
                   </div>
@@ -2169,6 +2049,7 @@ export default function BusinessLoan() {
                         placeholder="Enter reference name"
                         required
                       />
+                           {renderError("reference2Name")}
                     </div>
                     <div>
                       <label
@@ -2195,6 +2076,7 @@ export default function BusinessLoan() {
                           placeholder="Enter contact number"
                           required
                         />
+                         {renderError("reference2Contact")}
                       </div>
                     </div>
                   </div>
