@@ -2,10 +2,22 @@ import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { FaHandshake, FaLaptop, FaBolt, FaHeadset } from "react-icons/fa";
-import { Users, Building, MapPin, Shield, Star, Target, Phone, Mail } from "lucide-react";
+import { Users, Building, MapPin, Shield, Star, Target, Phone, Mail, Wallet, BriefcaseBusiness, Home as HomeIcon, Store } from "lucide-react";
 
 import backgroundImage from "../assets/background_image.jpg";
 import { useNavigate } from 'react-router-dom';
+import sbiLogo from "../assets/SBI_bank.png";
+import iciciLogo from "../assets/icici_bank.jpeg";
+import bankOfBarodaLogo from "../assets/bankofbaroda_bank.png";
+import axisLogo from "../assets/axis_bank.png";
+import hdfcLogo from "../assets/hdfc_bank.png";
+import bankOfIndiaLogo from "../assets/bankofindia_bank.png";
+import faircentLogo from "../assets/Faircent_bank.png";
+import heroFincorpLogo from "../assets/hero_fincorp_bank.jpeg";
+import kotakLogo from "../assets/kotak_mahindra_bank.jpeg";
+import muthootLogo from "../assets/muthoot_finance_bank.webp";
+import tataCapitalLogo from "../assets/TataCapital_bank.png";
+import adityaBirlaLogo from "../assets/AdityaBirlaCapital_bank.png";
 
 
 gsap.registerPlugin(useGSAP);
@@ -43,25 +55,25 @@ const Home = () => {
     {
       title: "Personal Loan",
       description: "Get Personal Loan Upto 40 Lac. Min. Salary 12k.",
-      icon: "https://cdn-icons-png.flaticon.com/512/1006/1006771.png",
+      icon: <Wallet className="w-10 h-10 text-[#12B99C]" />,
     },
     {
       title: "Business Loan",
       description:
         "Consulting with financial advisors or business experts can help…",
-      icon: "https://cdn-icons-png.flaticon.com/512/2881/2881032.png",
+      icon: <BriefcaseBusiness className="w-10 h-10 text-[#12B99C]" />,
     },
     {
       title: "Home Loan (Salaried)",
       description:
         "Easy home loans tailored for salaried customers with quick approvals.",
-      icon: "https://cdn-icons-png.flaticon.com/512/893/893292.png",
+      icon: <HomeIcon className="w-10 h-10 text-[#12B99C]" />,
     },
     {
       title: "Home Loan (Self Employed)",
       description:
         "Flexible home loans designed for self-employed professionals & business owners.",
-      icon: "https://cdn-icons-png.flaticon.com/512/743/743007.png",
+      icon: <Store className="w-10 h-10 text-[#12B99C]" />,
     },
   ];
 
@@ -91,18 +103,18 @@ const Home = () => {
 
 
   const partners = [
-    { name: "SBI", domain: "sbi.co.in", description: "India’s largest public sector bank." },
-    { name: "ICICI Bank", domain: "icicibank.com", description: "Leading private sector bank." },
-    { name: "Bank of Baroda", domain: "bankofbaroda.in", description: "Trusted nationalized bank." },
-    { name: "Axis Bank", domain: "axisbank.com", description: "Innovative financial services provider." },
-    { name: "HDFC Bank", domain: "hdfcbank.com", description: "Top private bank with wide services." },
-    { name: "Bank of India", domain: "bankofindia.co.in", description: "Reliable government bank." },
-    { name: "Faircent", domain: "faircent.com", description: "India’s leading P2P lending platform." },
-    { name: "Hero Fincorp", domain: "herofincorp.com", description: "Trusted non-banking finance firm." },
-    { name: "Kotak Mahindra", domain: "kotak.com", description: "Progressive financial services." },
-    { name: "Muthoot Finance", domain: "muthootfinance.com", description: "Largest gold loan NBFC." },
-    { name: "Tata Capital", domain: "tatacapital.com", description: "Trusted TATA financial arm." },
-    { name: "Aditya Birla Capital", domain: "adityabirlacapital.com", description: "Diverse financial solutions." },
+    { name: "SBI", logo: sbiLogo, description: "India’s largest public sector bank." },
+    { name: "ICICI Bank", logo: iciciLogo, description: "Leading private sector bank." },
+    { name: "Bank of Baroda", logo: bankOfBarodaLogo, description: "Trusted nationalized bank." },
+    { name: "Axis Bank", logo: axisLogo, description: "Innovative financial services provider." },
+    { name: "HDFC Bank", logo: hdfcLogo, description: "Top private bank with wide services." },
+    { name: "Bank of India", logo: bankOfIndiaLogo, description: "Reliable government bank." },
+    { name: "Faircent", logo: faircentLogo, description: "India’s leading P2P lending platform." },
+    { name: "Hero Fincorp", logo: heroFincorpLogo, description: "Trusted non-banking finance firm." },
+    { name: "Kotak Mahindra", logo: kotakLogo, description: "Progressive financial services." },
+    { name: "Muthoot Finance", logo: muthootLogo, description: "Largest gold loan NBFC." },
+    { name: "Tata Capital", logo: tataCapitalLogo, description: "Trusted TATA financial arm." },
+    { name: "Aditya Birla Capital", logo: adityaBirlaLogo, description: "Diverse financial solutions." },
   ];
 
   return (
@@ -265,12 +277,8 @@ const Home = () => {
               key={index}
               className="service-card bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300 h-full"
             >
-              <div className="bg-[#FFEDE1] p-4 rounded-full mb-4">
-                <img
-                  src={service.icon}
-                  alt={service.title}
-                  className="w-10 h-10 object-contain"
-                />
+              <div className="bg-[#FFEDE1] p-4 rounded-full mb-4 text-[#12B99C]">
+                {service.icon}
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 {service.title}
@@ -532,15 +540,14 @@ const Home = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {partners.map((partner) => (
               <div
-                key={partner.domain}
+                key={partner.name}
                 className="partner-card relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl p-8 h-45 flex flex-col items-center justify-center border border-white/20 shadow-xl"
               >
                 {/* Partner Logo */}
                 <img
-                  src={`https://logo.clearbit.com/${partner.domain}`}
+                  src={partner.logo}
                   alt={partner.name}
                   className="w-20 h-20 object-contain mb-4"
-                  onError={(e) => e.currentTarget.classList.add('hidden')}
                 />
 
                 {/* Partner Name */}
