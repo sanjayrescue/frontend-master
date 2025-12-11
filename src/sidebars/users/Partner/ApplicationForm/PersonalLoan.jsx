@@ -205,6 +205,7 @@ export default function PersonalLoan() {
 
     // Personal fields
     if (!formData.firstName) errors.firstName = "First name is required.";
+    if (!formData.middleName) errors.middleName = "Middle name is required.";
     if (!formData.lastName) errors.lastName = "Last name is required.";
     if (!formData.motherName) errors.motherName = "Mother's name is required.";
     if (!formData.pan) errors.pan = "PAN number is required.";
@@ -242,12 +243,31 @@ export default function PersonalLoan() {
     // Address
     if (!formData.currentAddress) errors.currentAddress = "Current address is required.";
     if (!formData.permanentAddress) errors.permanentAddress = "Permanent address is required.";
+    if (!formData.stabilityOfResidency) errors.stabilityOfResidency = "Stability of Residency is required.";
+    if (!formData.currentHouseStatus) errors.currentHouseStatus = "Current House Status is required.";
+    if (!formData.currentLandmark) errors.currentLandmark = "Landmark is required.";
+    if (!formData.pinCode) errors.pinCode = "Pin Code is required.";
+    if (!formData.permanentHouseStatus) errors.permanentHouseStatus = "Permanent House Status is required.";
+    if (!formData.permanentLandmark) errors.permanentLandmark = "Landmark is required.";
+    if (!formData.permanentStability) errors.permanentStability = "Stability is required.";
+    if (!formData.permanentAddressPinCode) errors.permanentAddressPinCode = "Pincode is required.";
+
 
     // Employment
     if (!formData.companyName) errors.companyName = "Company name is required.";
     if (!formData.designation) errors.designation = "Designation is required.";
     if (!formData.companyAddress) errors.companyAddress = "Company address is required.";
     if (!formData.monthlySalary) errors.monthlySalary = "Monthly salary is required.";
+    if (!formData.totalExperience) errors.totalExperience = "Total Experience is required.";
+    if (!formData.currentExperience) errors.currentExperience = "Current Experience is required.";
+    if (!formData.salaryInHand) errors.salaryInHand = "salary In Hand is required.";
+    if (!formData.companyIdCard) errors.companyIdCard = "Company Id Card is required.";
+    if (!formData.salarySlip1) errors.salarySlip1 = "salarySlip1 is required.";
+    if (!formData.salarySlip2) errors.salarySlip2 = "salarySlip2 is required.";
+    if (!formData.salarySlip3) errors.salarySlip3 = "salarySlip3 is required.";
+
+    // Bank Statement
+    if (!formData.bankStatement1) errors.bankStatement1 = "Bank Statement 1 is required.";
 
     // References
     if (!formData.reference1Name) errors.reference1Name = "Reference 1 name is required.";
@@ -267,6 +287,24 @@ export default function PersonalLoan() {
     // Loan
     if (formData.loanAmount === "" || formData.loanAmount === null || formData.loanAmount === undefined) {
       errors.loanAmount = "Loan amount is required.";
+    }
+
+
+    // Mandatory document validation
+    if (!formData.documents) {
+      errors.documents = "Aadhar front is required.";
+    }
+
+    if (!formData.documents) {
+      errors.documents = "Aadhar back is required.";
+    }
+
+    if (!formData.documents) {
+      errors.documents = "PAN card is required.";
+    }
+
+    if (!formData.documents) {
+      errors.documents = "Passport-size photo is required.";
     }
 
     return errors;
@@ -390,12 +428,12 @@ export default function PersonalLoan() {
 
       const headers = isPartnerLoggedIn
         ? {
-            Authorization: `Bearer ${partnerToken}`,
-            "Content-Type": "multipart/form-data",
-          }
+          Authorization: `Bearer ${partnerToken}`,
+          "Content-Type": "multipart/form-data",
+        }
         : {
-            "Content-Type": "multipart/form-data",
-          };
+          "Content-Type": "multipart/form-data",
+        };
 
       const response = await axios.post(endpoint, formDataToSend, {
         headers,
@@ -687,6 +725,7 @@ export default function PersonalLoan() {
                       placeholder="Enter your middle name"
                       required
                     />
+                    {renderError("middleName")}
                   </div>
                   <div>
                     <label
@@ -993,6 +1032,7 @@ export default function PersonalLoan() {
                           placeholder="Enter stability of residency"
                           required
                         />
+                        {renderError("stabilityOfResidency")}
                       </div>
 
                       <div className="mb-4">
@@ -1013,10 +1053,12 @@ export default function PersonalLoan() {
                           }}
                           required
                         >
+
                           <option value="">Select status</option>
                           <option value="rented">Rented</option>
                           <option value="own">Own</option>
                         </select>
+                        {renderError("currentHouseStatus")}
                       </div>
                     </div>
 
@@ -1042,6 +1084,7 @@ export default function PersonalLoan() {
                           placeholder="Enter landmark for current address"
                           required
                         />
+                        {renderError("currentLandmark")}
                       </div>
 
                       <div className="mb-4">
@@ -1064,6 +1107,7 @@ export default function PersonalLoan() {
                           placeholder="Enter pin code"
                           required
                         />
+                        {renderError("pinCode")}
                       </div>
                     </div>
                   </div>
@@ -1130,10 +1174,12 @@ export default function PersonalLoan() {
                           }}
                           required
                         >
+
                           <option value="">Select status</option>
                           <option value="rented">Rented</option>
                           <option value="own">Own</option>
                         </select>
+                        {renderError("permanentHouseStatus")}
                       </div>
 
                       <div className="mb-4">
@@ -1156,6 +1202,7 @@ export default function PersonalLoan() {
                           placeholder="Enter landmark for permanent address"
                           required
                         />
+                        {renderError("permanentLandmark")}
                       </div>
                     </div>
 
@@ -1181,6 +1228,7 @@ export default function PersonalLoan() {
                           placeholder="Enter stability for permanent address"
                           required
                         />
+                        {renderError("permanentStability")}
                       </div>
 
                       <div className="mb-4">
@@ -1203,6 +1251,7 @@ export default function PersonalLoan() {
                           placeholder="Enter pin code"
                           required
                         />
+                        {renderError("permanentAddressPinCode")}
                       </div>
                     </div>
                   </div>
@@ -1306,6 +1355,7 @@ export default function PersonalLoan() {
                           accept={doc.accept || ".pdf,.jpg,.jpeg,.png"}
                           required={doc.required}
                         />
+                        {renderError("documents")}
 
                         {/* View Button */}
                         {formData[doc.name] && (
@@ -1316,8 +1366,8 @@ export default function PersonalLoan() {
                                 formData[doc.name].preview
                                   ? formData[doc.name].preview
                                   : formData[doc.name] instanceof File
-                                  ? URL.createObjectURL(formData[doc.name])
-                                  : ""
+                                    ? URL.createObjectURL(formData[doc.name])
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1497,6 +1547,7 @@ export default function PersonalLoan() {
                         min="0"
                         required
                       />
+                      {renderError("totalExperience")}
                     </div>
                   </div>
                   <div>
@@ -1520,6 +1571,7 @@ export default function PersonalLoan() {
                       min="0"
                       required
                     />
+                    {renderError("currentExperience")}
                   </div>
                   <div>
                     <label
@@ -1542,6 +1594,7 @@ export default function PersonalLoan() {
                       min="0"
                       required
                     />
+                    {renderError("salaryInHand")}
                   </div>
 
                   <div>
@@ -1565,6 +1618,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      {renderError("companyIdCard")}
 
                       {/* Action Buttons */}
                       {formData.companyIdCard && (
@@ -1577,8 +1631,8 @@ export default function PersonalLoan() {
                                 formData.companyIdCard.preview
                                   ? formData.companyIdCard.preview
                                   : formData.companyIdCard instanceof File
-                                  ? URL.createObjectURL(formData.companyIdCard)
-                                  : ""
+                                    ? URL.createObjectURL(formData.companyIdCard)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1650,6 +1704,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      {renderError("salarySlip1")}
 
                       {/* Action Buttons */}
                       {formData.salarySlip1 && (
@@ -1662,8 +1717,8 @@ export default function PersonalLoan() {
                                 formData.salarySlip1.preview
                                   ? formData.salarySlip1.preview
                                   : formData.salarySlip1 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip1)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip1)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1735,6 +1790,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      {renderError("salarySlip2")}
 
                       {/* Action Buttons */}
                       {formData.salarySlip2 && (
@@ -1747,8 +1803,8 @@ export default function PersonalLoan() {
                                 formData.salarySlip2.preview
                                   ? formData.salarySlip2.preview
                                   : formData.salarySlip2 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip2)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip2)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1820,6 +1876,8 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      {renderError("salarySlip3")}
+
 
                       {/* Action Buttons */}
                       {formData.salarySlip3 && (
@@ -1832,8 +1890,8 @@ export default function PersonalLoan() {
                                 formData.salarySlip3.preview
                                   ? formData.salarySlip3.preview
                                   : formData.salarySlip3 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip3)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip3)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1916,8 +1974,8 @@ export default function PersonalLoan() {
                                 formData.form16_26as.preview
                                   ? formData.form16_26as.preview
                                   : formData.form16_26as instanceof File
-                                  ? URL.createObjectURL(formData.form16_26as)
-                                  : ""
+                                    ? URL.createObjectURL(formData.form16_26as)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -2002,7 +2060,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-
+                      {renderError("bankStatement1")}
                       {/* Action Buttons */}
                       {formData.bankStatement1 && (
                         <div className="flex items-center gap-1">
@@ -2014,8 +2072,8 @@ export default function PersonalLoan() {
                                 formData.bankStatement1.preview
                                   ? formData.bankStatement1.preview
                                   : formData.bankStatement1 instanceof File
-                                  ? URL.createObjectURL(formData.bankStatement1)
-                                  : ""
+                                    ? URL.createObjectURL(formData.bankStatement1)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -2098,8 +2156,8 @@ export default function PersonalLoan() {
                                 formData.bankStatement2.preview
                                   ? formData.bankStatement2.preview
                                   : formData.bankStatement2 instanceof File
-                                  ? URL.createObjectURL(formData.bankStatement2)
-                                  : ""
+                                    ? URL.createObjectURL(formData.bankStatement2)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
