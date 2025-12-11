@@ -43,7 +43,7 @@ export default function HomeLoanSalaried() {
     maritalStatus: "",
     wifeName: "",
     motherName: "",
-    companyIdCard: "",
+
     selfie: "",
     contactNo: "",
     email: "",
@@ -60,8 +60,18 @@ export default function HomeLoanSalaried() {
     designation: "",
     companyAddress: "",
     monthlySalary: "",
+
+    // Employeement information
     totalExperience: "",
     currentExperience: "",
+    salaryInHand: "",
+    companyIdCard: "",
+    salarySlip1: "",
+    salarySlip2: "",
+    salarySlip3: "",
+    form16_26as: "",
+
+
     salarySlip: "",
     bankStatement: "",
     photoCopy: "",
@@ -80,14 +90,14 @@ export default function HomeLoanSalaried() {
     titleDeeds: "",
     resalePaymentReceipts: "",
     agreementCopy: "",
+
+    // Document
     aadharFront: "",
     aadharBack: "",
     panCard: "",
     passportPhoto: "",
-    salarySlip1: "",
-    salarySlip2: "",
-    salarySlip3: "",
-    salaryInHand: "",
+
+
     bankStatement1: "",
     bankStatement2: "",
     bankStatement3: "",
@@ -180,37 +190,75 @@ export default function HomeLoanSalaried() {
     }
   };
 
+  // const handleSameAddressChange = (e) => {
+  //   setSameAddress(e.target.checked);
+  //   if (e.target.checked) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       permanentAddress: prev.currentAddress,
+  //     }));
+  //   } else {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       permanentAddress: "",
+  //     }));
+  //   }
+  // };
+
   const handleSameAddressChange = (e) => {
-    setSameAddress(e.target.checked);
-    if (e.target.checked) {
+    const checked = e.target.checked;
+    setSameAddress(checked);
+
+    if (checked) {
       setFormData((prev) => ({
         ...prev,
         permanentAddress: prev.currentAddress,
+        permanentHouseStatus: prev.currentHouseStatus,
+        permanentLandmark: prev.currentLandmark,
+        permanentAddressPinCode: prev.currentAddressPinCode,
+        permanentStability: prev.stabilityOfResidency,
       }));
+
+      // ✅ Clear previous permanent field errors
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.permanentAddress;
+        delete newErrors.permanentHouseStatus;
+        delete newErrors.permanentLandmark;
+        delete newErrors.permanentAddressPinCode;
+        delete newErrors.permanentStability;
+        return newErrors;
+      });
     } else {
       setFormData((prev) => ({
         ...prev,
         permanentAddress: "",
+        permanentHouseStatus: "",
+        permanentLandmark: "",
+        permanentAddressPinCode: "",
+        permanentStability: "",
       }));
     }
   };
+
 
   const renderError = (field) =>
     fieldErrors[field] ? (
       <p className="text-xs text-red-600 mt-1">{fieldErrors[field]}</p>
     ) : null;
 
-  function validateRegistrationForm(formData) {
+  function validateRegistrationForm(formData, sameAddress) {
     const errors = {};
 
     // Personal fields
     if (!formData.firstName) errors.firstName = "First name is required.";
-    if(!formData.middleName) errors.middleName = "Middle name is required";
+    if (!formData.middleName) errors.middleName = "Middle name is required";
     if (!formData.lastName) errors.lastName = "Last name is required.";
     if (!formData.motherName) errors.motherName = "Mother's name is required.";
     if (!formData.pan) errors.pan = "PAN number is required.";
     if (!formData.gender) errors.gender = "Gender is required.";
     if (!formData.maritalStatus) errors.maritalStatus = "Marital status is required.";
+
     if (!formData.password) errors.password = "Password is required.";
     if (!formData.confirmPassword) errors.confirmPassword = "Confirm Password is required.";
     if (
@@ -240,15 +288,60 @@ export default function HomeLoanSalaried() {
       errors.dob = "You must be at least 18 years old to proceed.";
     }
 
-    // Address
-    if (!formData.currentAddress) errors.currentAddress = "Current address is required.";
-    if (!formData.permanentAddress) errors.permanentAddress = "Permanent address is required.";
+    // Address Validation
+    if (!formData.currentAddress)
+      errors.currentAddress = "Current address is required.";
+
+    if (!formData.stabilityOfResidency)
+      errors.stabilityOfResidency = "Stability of residency is required.";
+
+    if (!formData.currentLandmark)
+      errors.currentLandmark = "Current landmark is required.";
+
+    if (!formData.currentHouseStatus)
+      errors.currentHouseStatus = "Current house status is required.";
+
+    if (!formData.currentAddressPinCode)
+      errors.currentAddressPinCode = "Current Address Pin is required.";
+
+    // Permanent Address — YOU WANT THESE ALWAYS VALIDATED
+    if (!sameAddress) {
+      if (!formData.permanentAddress)
+        errors.permanentAddress = "Permanent address is required.";
+
+      if (!formData.permanentStability)
+        errors.permanentStability = "Permanent stability of residency is required.";
+
+      if (!formData.permanentLandmark)
+        errors.permanentLandmark = "Permanent landmark is required.";
+
+      if (!formData.permanentHouseStatus)
+        errors.permanentHouseStatus = "Permanent house status is required.";
+
+      if (!formData.permanentAddressPinCode)
+        errors.permanentAddressPinCode = "Permanent Address Pin is required.";
+    }
+    // Document
+
+    if (!formData.aadharFront) errors.aadharFront = "Aadhar Front is required";
+    if (!formData.aadharBack) errors.aadharBack = "Aadhar Back is required";
+    if (!formData.panCard) errors.panCard = "Pan Card is required";
+    if (!formData.passportPhoto) errors.passportPhoto = "Passport photo is required";
 
     // Employment
     if (!formData.companyName) errors.companyName = "Company name is required.";
     if (!formData.designation) errors.designation = "Designation is required.";
     if (!formData.companyAddress) errors.companyAddress = "Company address is required.";
     if (!formData.monthlySalary) errors.monthlySalary = "Monthly salary is required.";
+    if (!formData.totalExperience) errors.totalExperience = "Total Experience is required";
+    if (!formData.currentExperience) errors.currentExperience = "Current Experience is required";
+    if (!formData.salaryInHand) errors.salaryInHand = "Salary in hand is required";
+    if (!formData.companyIdCard) errors.companyIdCard = "Company Id card is required";
+    if (!formData.salarySlip1) errors.salarySlip1 = "Salary slip 1 is required";
+    if (!formData.salarySlip2) errors.salarySlip2 = "Salary slip 2 is required";
+    if (!formData.salarySlip3) errors.salarySlip3 = "Salary slip 3 is required";
+    // if (!formData.form16_26as) errors.form16_26as = "Form 16 is required";/
+
 
     // References
     if (!formData.reference1Name) errors.reference1Name = "Reference 1 name is required.";
@@ -272,6 +365,11 @@ export default function HomeLoanSalaried() {
     ) {
       errors.loanAmount = "Loan amount is required.";
     }
+
+    if (!formData.bankStatement1) errors.bankStatement1 = "Bank Statement is required.";
+
+
+
 
     return errors;
   }
@@ -394,12 +492,12 @@ export default function HomeLoanSalaried() {
 
       const headers = isPartnerLoggedIn
         ? {
-            Authorization: `Bearer ${partnerToken}`,
-            "Content-Type": "multipart/form-data",
-          }
+          Authorization: `Bearer ${partnerToken}`,
+          "Content-Type": "multipart/form-data",
+        }
         : {
-            "Content-Type": "multipart/form-data",
-          };
+          "Content-Type": "multipart/form-data",
+        };
 
       const response = await axios.post(endpoint, formDataToSend, {
         headers,
@@ -741,7 +839,7 @@ export default function HomeLoanSalaried() {
                         required
                       />
                     </div>
-                  {renderError("contactNo")}
+                    {renderError("contactNo")}
                   </div>
                   <div>
                     <label
@@ -771,7 +869,7 @@ export default function HomeLoanSalaried() {
                     </div>
                     {renderError("email")}
                   </div>
-                {/* Referral moved to end */}
+                  {/* Referral moved to end */}
                   <div>
                     <label
                       className="block text-sm font-medium mb-2"
@@ -793,6 +891,8 @@ export default function HomeLoanSalaried() {
                         placeholder="Enter pan number"
                         required
                       />
+
+
                     </div>
                     {renderError("pan")}
                   </div>
@@ -846,6 +946,8 @@ export default function HomeLoanSalaried() {
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+
+                    {renderError("gender")}
                   </div>
                   <div>
                     <label
@@ -891,6 +993,8 @@ export default function HomeLoanSalaried() {
                       <option value="single">Single</option>
                       <option value="married">Married</option>
                     </select>
+
+                    {renderError("maritalStatus")}
                   </div>
                   {formData.maritalStatus === "married" && (
                     <div>
@@ -996,6 +1100,7 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter stability of residency"
                           required
                         />
+                        {renderError("stabilityOfResidency")}
                       </div>
 
                       <div className="mb-4">
@@ -1020,6 +1125,8 @@ export default function HomeLoanSalaried() {
                           <option value="rented">Rented</option>
                           <option value="own">Own</option>
                         </select>
+
+                        {renderError("currentHouseStatus")}
                       </div>
                     </div>
 
@@ -1045,6 +1152,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter landmark for current address"
                           required
                         />
+
+                        {renderError("currentLandmark")}
                       </div>
 
                       <div className="mb-4">
@@ -1067,6 +1176,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter pin code"
                           required
                         />
+
+                        {renderError("currentAddressPinCode")}
                       </div>
                     </div>
                   </div>
@@ -1106,7 +1217,7 @@ export default function HomeLoanSalaried() {
                       }}
                       rows="3"
                       placeholder="Enter your permanent address"
-                      disabled={sameAddress}
+                      readOnly={sameAddress}
                       required
                     />
                     {renderError("permanentAddress")}
@@ -1137,6 +1248,8 @@ export default function HomeLoanSalaried() {
                           <option value="rented">Rented</option>
                           <option value="own">Own</option>
                         </select>
+
+                        {renderError("permanentHouseStatus")}
                       </div>
 
                       <div className="mb-4">
@@ -1159,6 +1272,7 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter landmark for permanent address"
                           required
                         />
+                        {renderError('permanentLandmark')}
                       </div>
                     </div>
 
@@ -1184,6 +1298,7 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter stability for permanent address"
                           required
                         />
+                        {renderError('permanentStability')}
                       </div>
 
                       <div className="mb-4">
@@ -1206,6 +1321,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter pin code"
                           required
                         />
+
+                        {renderError('permanentAddressPinCode')}
                       </div>
                     </div>
                   </div>
@@ -1248,7 +1365,8 @@ export default function HomeLoanSalaried() {
                       min="0"
                       required
                     />
-                    {renderError("loanAmount")}
+
+                    {formData.loanAmount?" ": renderError("loanAmount")}
                   </div>
                 </div>
               </section>
@@ -1319,8 +1437,8 @@ export default function HomeLoanSalaried() {
                                 formData[doc.name].preview
                                   ? formData[doc.name].preview
                                   : formData[doc.name] instanceof File
-                                  ? URL.createObjectURL(formData[doc.name])
-                                  : ""
+                                    ? URL.createObjectURL(formData[doc.name])
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1370,7 +1488,10 @@ export default function HomeLoanSalaried() {
                           <span>✓</span> {formData[doc.name].name}
                         </p>
                       )}
+
+                      {formData[doc.name]?" ": renderError(doc.name)}
                     </div>
+
                   ))}
                 </div>
               </section>
@@ -1472,6 +1593,8 @@ export default function HomeLoanSalaried() {
                       min="0"
                       required
                     />
+
+                    {renderError('monthlySalary')}
                   </div>
                   <div>
                     <label
@@ -1499,6 +1622,8 @@ export default function HomeLoanSalaried() {
                         min="0"
                         required
                       />
+
+                      {renderError('totalExperience')}
                     </div>
                   </div>
                   <div>
@@ -1522,6 +1647,8 @@ export default function HomeLoanSalaried() {
                       min="0"
                       required
                     />
+
+                    {renderError('currentExperience')}
                   </div>
                   <div>
                     <label
@@ -1544,6 +1671,7 @@ export default function HomeLoanSalaried() {
                       min="0"
                       required
                     />
+                    {renderError('salaryInHand')}
                   </div>
 
                   <div>
@@ -1579,8 +1707,8 @@ export default function HomeLoanSalaried() {
                                 formData.companyIdCard.preview
                                   ? formData.companyIdCard.preview
                                   : formData.companyIdCard instanceof File
-                                  ? URL.createObjectURL(formData.companyIdCard)
-                                  : ""
+                                    ? URL.createObjectURL(formData.companyIdCard)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1629,6 +1757,8 @@ export default function HomeLoanSalaried() {
                         <span>✓</span> {formData.companyIdCard.name}
                       </p>
                     )}
+
+                    {formData.companyIdCard ? "" : renderError('companyIdCard')}
                   </div>
 
                   <div>
@@ -1664,8 +1794,8 @@ export default function HomeLoanSalaried() {
                                 formData.salarySlip1.preview
                                   ? formData.salarySlip1.preview
                                   : formData.salarySlip1 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip1)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip1)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1714,6 +1844,8 @@ export default function HomeLoanSalaried() {
                         <span>✓</span> {formData.salarySlip1.name}
                       </p>
                     )}
+
+                    {formData.salarySlip1 ? " " : renderError('salarySlip1')}
                   </div>
 
                   <div>
@@ -1749,8 +1881,8 @@ export default function HomeLoanSalaried() {
                                 formData.salarySlip2.preview
                                   ? formData.salarySlip2.preview
                                   : formData.salarySlip2 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip2)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip2)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1799,6 +1931,8 @@ export default function HomeLoanSalaried() {
                         <span>✓</span> {formData.salarySlip2.name}
                       </p>
                     )}
+
+                    {formData.salarySlip2 ? " " : renderError('salarySlip2')}
                   </div>
 
                   <div>
@@ -1834,8 +1968,8 @@ export default function HomeLoanSalaried() {
                                 formData.salarySlip3.preview
                                   ? formData.salarySlip3.preview
                                   : formData.salarySlip3 instanceof File
-                                  ? URL.createObjectURL(formData.salarySlip3)
-                                  : ""
+                                    ? URL.createObjectURL(formData.salarySlip3)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -1884,6 +2018,8 @@ export default function HomeLoanSalaried() {
                         <span>✓</span> {formData.salarySlip3.name}
                       </p>
                     )}
+
+                    {formData.salarySlip3 ? " " : renderError('salarySlip3')}
                   </div>
 
                   <div>
@@ -1918,8 +2054,8 @@ export default function HomeLoanSalaried() {
                                 formData.form16_26as.preview
                                   ? formData.form16_26as.preview
                                   : formData.form16_26as instanceof File
-                                  ? URL.createObjectURL(formData.form16_26as)
-                                  : ""
+                                    ? URL.createObjectURL(formData.form16_26as)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -2016,8 +2152,8 @@ export default function HomeLoanSalaried() {
                                 formData.bankStatement1.preview
                                   ? formData.bankStatement1.preview
                                   : formData.bankStatement1 instanceof File
-                                  ? URL.createObjectURL(formData.bankStatement1)
-                                  : ""
+                                    ? URL.createObjectURL(formData.bankStatement1)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -2066,6 +2202,8 @@ export default function HomeLoanSalaried() {
                         <span>✓</span> {formData.bankStatement1.name}
                       </p>
                     )}
+
+                    {formData.bankStatement1 ? " " : renderError('bankStatement1')}
                   </div>
 
                   <div>
@@ -2100,8 +2238,8 @@ export default function HomeLoanSalaried() {
                                 formData.bankStatement2.preview
                                   ? formData.bankStatement2.preview
                                   : formData.bankStatement2 instanceof File
-                                  ? URL.createObjectURL(formData.bankStatement2)
-                                  : ""
+                                    ? URL.createObjectURL(formData.bankStatement2)
+                                    : ""
                               )
                             }
                             className="p-1 rounded-full hover:bg-blue-100 transition-colors"
@@ -2232,6 +2370,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter reference name"
                           required
                         />
+
+                        {renderError('reference1Name')}
                       </div>
                       <div>
                         <label
@@ -2253,6 +2393,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter contact number"
                           required
                         />
+
+                        {renderError('reference1Contact')}
                       </div>
                     </div>
                   </div>
@@ -2290,6 +2432,8 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter reference name"
                           required
                         />
+
+                        {renderError('reference2Name')}
                       </div>
                       <div>
                         <label
@@ -2311,6 +2455,7 @@ export default function HomeLoanSalaried() {
                           placeholder="Enter contact number"
                           required
                         />
+                        {renderError('reference2Contact')}
                       </div>
                     </div>
                   </div>
@@ -2346,6 +2491,8 @@ export default function HomeLoanSalaried() {
                       placeholder="Enter password"
                       required
                     />
+
+                    {renderError('password')}
                   </div>
                   <div>
                     <label
@@ -2367,6 +2514,7 @@ export default function HomeLoanSalaried() {
                       placeholder="Re-enter password"
                       required
                     />
+                    {renderError('confirmPassword')}
                   </div>
                 </div>
               </section>
