@@ -4,7 +4,7 @@ import {
   Zap,
   Home,
   Car,
-  CreditCard,
+  User,
   FileText,
   Building2,
   Users,
@@ -35,7 +35,7 @@ const navigate = useNavigate();
     title: "Personal Loan",
     description: "We are providing Personal Loans for individuals having salary between ₹12k and ₹5 lac.",
     amount: "₹12k min Sal",
-    icon: DollarSign,
+    icon: User,
     features: [
       "Salary requirement: ₹12k to ₹5 lac",
       "Quick approval process",
@@ -51,7 +51,7 @@ const navigate = useNavigate();
     title: "Home Loan Salaried",
     description: "Get instant loans within 10 minutes using just your Aadhaar and PAN card details.",
     amount: "Call Us to Know",
-    icon: Zap,
+    icon: Home,
     features: [
       "For salaried Person",
       "1 Day approval",
@@ -67,7 +67,7 @@ const navigate = useNavigate();
     title: "Home Loan Bussiness",
     description: "We provide home loans for salaried employees and business owners with flexible terms.",
     amount: "Call Us to Know",
-    icon: Home,
+    icon: Building2,
     features: [
       "For Business persons",
       "Flexible repayment terms",
@@ -82,7 +82,7 @@ const navigate = useNavigate();
     title: "Business Loan",
     description: "Finance your dream vehicle with our comprehensive vehicle loan solutions.",
     amount: "Any Bussiness",
-    icon: Car,
+    icon: Briefcase,
     features: [
       "Lowest Rate",
       "Quick processing",

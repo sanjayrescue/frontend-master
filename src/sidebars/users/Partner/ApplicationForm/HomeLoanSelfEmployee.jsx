@@ -22,7 +22,7 @@ import { getAuthData } from "../../../../utils/localStorage";
 import { backendurl } from "../../../../feature/urldata";
 
 export default function HomeLoanSelfEmployee() {
-  const defaultReferralCode ="PT-D4CTD8B2"
+  const defaultReferralCode = "PT-D4CTD8B2"
   const { partnerToken } = getAuthData();
   const isPartnerLoggedIn = Boolean(partnerToken);
 
@@ -35,6 +35,8 @@ export default function HomeLoanSelfEmployee() {
     alternateContact: "",
     email: "",
     gender: "",
+
+
     motherName: "",
     maritalStatus: "",
     SpouseName: "",
@@ -71,10 +73,13 @@ export default function HomeLoanSelfEmployee() {
     lightBillSelected: false,
     utilityBillSelected: false,
     rentAgreementSelected: false,
+
+
     shopPhoto: null,
     shopAct: null,
     udhyamAadhar: null,
     itr: null,
+
     gstNumber: "",
     gstDoc: null,
     bankStatementFile1: null,
@@ -112,6 +117,7 @@ export default function HomeLoanSelfEmployee() {
   const [validationErrors, setValidationErrors] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [savedApplication, setSavedApplication] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // const handleInputChange = (e) => {
   //     const { name, value } = e.target;
@@ -212,114 +218,175 @@ export default function HomeLoanSelfEmployee() {
     }
   };
 
+  const renderError = (field) =>
+    fieldErrors[field] ? (
+      <p className="text-xs text-red-600 mt-1">{fieldErrors[field]}</p>
+    ) : null;
+
+
+
   function validateForm(formData, sameAddress) {
-    const errors = [];
-  
+    const errors = {};
+
     // Personal info
-    if (!formData.firstName) errors.push("First name is required.");
-    if (!formData.lastName) errors.push("Last name is required.");
-    if (!formData?.phone) {
-      errors.push("Phone number is required.");
-    } else if (!/^\d{10}$/.test(formData?.phone)) {
-      errors.push("Phone number must be exactly 10 digits.");
-    }
-    if (!formData.email) errors.push("Email is required.");
-    if (!formData.gender) errors.push("Gender is required.");
-    if (!formData.maritalStatus) errors.push("Marital status is required.");
-  
+    if (!formData.firstName) errors.firstName = "First name is required.";
+    if (!formData.lastName) errors.lastName = "Last name is required.";
+    if (!formData.motherName) errors.motherName = "Mother name is required.";
+
+    if (!formData.gender) errors.gender = "Gender is required.";
+    if (!formData.maritalStatus) errors.maritalStatus = "Marital status is required.";
+    // Spouse name required if married
     if (formData.maritalStatus === "married" && !formData.SpouseName) {
-      errors.push("Spouse name is required for married applicants.");
+      errors.SpouseName = "Spouse name is required for married applicants.";
     }
-  
+
+
+    if (!formData.phone) {
+      errors.phone = "Phone number is required.";
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      errors.phone = "Phone number must be 10 digits.";
+    }
+
+    if (!formData.email) errors.email = "Email is required.";
+    if (!formData.panNumber) errors.panNumber = "Pan Card Number is required."
+
+
+
     // Current address
-    if (
-      !formData.currentAddress ||
-      !formData.currentAddressPincode ||
-      !formData.currentAddressOwnRented ||
-      !formData.currentAddressStability
-    ) {
-      errors.push("All current address fields are required.");
-    }
-  
-    // At least one proof
-    if (!formData.lightBill && !formData.utilityBill && !formData.rentAgreement) {
-      errors.push(
-        "At least one address proof is required (Light bill / Utility bill / Rent Agreement)."
-      );
-    }
-  
+    if (!formData.currentAddress)
+      errors.currentAddress = "Current address is required.";
+    if (!formData.currentAddressPincode)
+      errors.currentAddressPincode = "Pincode is required.";
+    if (!formData.currentAddressOwnRented)
+      errors.currentAddressOwnRented = "Ownership status is required.";
+    if (!formData.currentAddressStability)
+      errors.currentAddressStability = "Stability is required.";
+
     // Permanent address if not same
-    if (
-      !sameAddress &&
-      (!formData.permanentAddress ||
-        !formData.permanentAddressPincode ||
-        !formData.permanentAddressOwnRented ||
-        !formData.permanentAddressStability)
-    ) {
-      errors.push("All permanent address fields are required.");
+    if (!sameAddress) {
+      if (!formData.permanentAddress)
+        errors.permanentAddress = "Permanent address is required.";
+      if (!formData.permanentAddressPincode)
+        errors.permanentAddressPincode = "Pincode is required.";
+      if (!formData.permanentAddressOwnRented)
+        errors.permanentAddressOwnRented = "Ownership status is required.";
+      if (!formData.permanentAddressStability)
+        errors.permanentAddressStability = "Stability is required.";
     }
-  
+
+    if (
+      formData.loanAmount === "" ||
+      formData.loanAmount === null ||
+      formData.loanAmount === undefined
+    ) {
+      errors.loanAmount = "Loan amount is required.";
+    }
+
+
+    // At least one address proof
+    if (!formData.lightBill && !formData.utilityBill && !formData.rentAgreement) {
+      errors.addressProof = "At least one address proof is required.";
+    }
+
+    
+    if (!formData.aadharFront) errors.aadharFront = "Aadhar Front is required";
+    if (!formData.aadharBack) errors.aadharBack = "Aadhar Back is required";
+    if (!formData.panCard) errors.panCard = "Pan card number is required.";
+    if (!formData.selfie) errors.selfie = "Upload selfie is required."
+
+
     // Business info
-    if (!formData.businessName) errors.push("Business name is required.");
-    if (!formData.businessAddress) errors.push("Business address is required.");
+    if (!formData.businessName)
+      errors.businessName = "Business name is required.";
+    if (!formData.businessAddress)
+      errors.businessAddress = "Business address is required.";
     if (!formData.businessVintage)
-      errors.push("Business vintage is required.");
-  
-    // Female applicant -> co-applicant docs
+      errors.businessVintage = "Business vintage is required.";
+    if (!formData.annualTurnover)
+      errors.annualTurnover = "Annual Turnover is required. "
+
+
+    // Female applicant requires co-applicant docs
     if (formData.gender === "female") {
       if (!formData.coApplicantAadharFront)
-        errors.push("Co-applicant Aadhar front is required.");
+        errors.coApplicantAadharFront = "Co-applicant Aadhar front is required.";
       if (!formData.coApplicantAadharBack)
-        errors.push("Co-applicant Aadhar back is required.");
+        errors.coApplicantAadharBack = "Co-applicant Aadhar back is required.";
       if (!formData.coApplicantPan)
-        errors.push("Co-applicant PAN is required.");
+        errors.coApplicantPan = "Co-applicant PAN is required.";
       if (!formData.coApplicantMobile)
-        errors.push("Co-applicant mobile is required.");
+        errors.coApplicantMobile = "Co-applicant mobile is required.";
       else if (!/^\d{10}$/.test(formData.coApplicantMobile)) {
-        errors.push("Co-applicant mobile must be exactly 10 digits.");
+        errors.coApplicantMobile = "Mobile must be 10 digits.";
       }
       if (!formData.coApplicantSelfie)
-        errors.push("Co-applicant selfie is required.");
+        errors.coApplicantSelfie = "Co-applicant selfie is required.";
     }
-  
+
     // References
-    if (!formData.reference1Name) errors.push("Reference 1 name is required.");
+    if (!formData.reference1Name)
+      errors.reference1Name = "Reference 1 name is required.";
     if (!formData.reference1Contact)
-      errors.push("Reference 1 contact is required.");
+      errors.reference1Contact = "Reference 1 contact is required.";
     else if (!/^\d{10}$/.test(formData.reference1Contact)) {
-      errors.push("Reference 1 contact must be exactly 10 digits.");
+      errors.reference1Contact = "Reference 1 contact must be 10 digits.";
     }
-  
-    if (!formData.reference2Name) errors.push("Reference 2 name is required.");
+
+    if (!formData.reference2Name)
+      errors.reference2Name = "Reference 2 name is required.";
     if (!formData.reference2Contact)
-      errors.push("Reference 2 contact is required.");
+      errors.reference2Contact = "Reference 2 contact is required.";
     else if (!/^\d{10}$/.test(formData.reference2Contact)) {
-      errors.push("Reference 2 contact must be exactly 10 digits.");
+      errors.reference2Contact = "Reference 2 contact must be 10 digits.";
     }
-  
+
+
+    if (!formData.bankStatementFile1) errors.bankStatementFile1 = "Bank Statement is required.";
+
+    // business document
+
+    //  shopPhoto: null,
+    // shopAct: null,
+    // udhyamAadhar: null,
+    // itr: null,
+
+    if (!formData.shopPhoto)
+      errors.shopPhoto = "Shop Photo is required.";
+
+    if (!formData.shopAct)
+      errors.shopAct = "Shop and Establishment Act/ Gumasta License is required.";
+
+    if (!formData.itr)
+      errors.itr = "ITR is required.";
+
+    if (!formData.udhyamAadhar)
+      errors.udhyamAadhar = "Udhyam Aadhar is required."
+
+
+
     return errors;
   }
-  
-  
+
+
 
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
-  setValidationErrors([]);
-  setSuccessMessage("");
-  setSavedApplication(null);
+    setValidationErrors([]);
+    setSuccessMessage("");
+    setSavedApplication(null);
     try {
       const errors = validateForm(formData, sameAddress);
-      if (errors.length > 0) {
-      setValidationErrors(errors);
-      setLoading(false);
-      return;
-    }
-    if (error) {
-      setValidationErrors([error]);
-      setLoading(false);
-      return;
-    }
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setLoading(false);
+        return;
+      }
+      if (error) {
+        setValidationErrors([error]);
+        setLoading(false);
+        return;
+      }
 
       // Build nested JSON structure
       const applicationData = {
@@ -374,12 +441,12 @@ export default function HomeLoanSelfEmployee() {
         coApplicant:
           formData.gender === "female"
             ? {
-                aadharFront: formData.coApplicantAadharFront,
-                aadharBack: formData.coApplicantAadharBack,
-                panCard: formData.coApplicantPan,
-                phone: formData.coApplicantMobile,
-                selfie: formData.coApplicantSelfie,
-              }
+              aadharFront: formData.coApplicantAadharFront,
+              aadharBack: formData.coApplicantAadharBack,
+              panCard: formData.coApplicantPan,
+              phone: formData.coApplicantMobile,
+              selfie: formData.coApplicantSelfie,
+            }
             : undefined,
       };
 
@@ -460,22 +527,22 @@ export default function HomeLoanSelfEmployee() {
       });
 
 
-  if(!checkFileSize(docsQueue)){
-    setLoading(false);
-    return ;
-  }
+      if (!checkFileSize(docsQueue)) {
+        setLoading(false);
+        return;
+      }
       const endpoint = isPartnerLoggedIn
         ? `${backendurl}/partner/create-applications`
         : `${backendurl}/partner/public/create-application`;
 
       const headers = isPartnerLoggedIn
         ? {
-            Authorization: `Bearer ${partnerToken}`,
-            "Content-Type": "multipart/form-data",
-          }
+          Authorization: `Bearer ${partnerToken}`,
+          "Content-Type": "multipart/form-data",
+        }
         : {
-            "Content-Type": "multipart/form-data",
-          };
+          "Content-Type": "multipart/form-data",
+        };
 
       const response = await axios.post(endpoint, formDataToSend, {
         headers,
@@ -483,16 +550,16 @@ export default function HomeLoanSelfEmployee() {
       const data = response.data;
 
       setApplicationId(data.id);
-  setSavedApplication(data);
-  setSuccessMessage(
-    data.message || "Application saved successfully. You can submit now."
-  );
-  setModalOpen(true);
+      setSavedApplication(data);
+      setSuccessMessage(
+        data.message || "Application saved successfully. You can submit now."
+      );
+      setModalOpen(true);
     } catch (err) {
-  setError(
-    err.response?.data?.message || err.message || "Something went wrong."
-  );
-  setValidationErrors(err.response?.data?.errors || []);
+      setError(
+        err.response?.data?.message || err.message || "Something went wrong."
+      );
+      setValidationErrors(err.response?.data?.errors || []);
     } finally {
       setLoading(false);
     }
@@ -532,85 +599,83 @@ export default function HomeLoanSelfEmployee() {
 
 
 
-  const resetFields=()=>{
+  const resetFields = () => {
     setFormData({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    phone: "",
-    alternateContact: "",
-    email: "",
-    gender: "",
-    motherName: "",
-    maritalStatus: "",
-    SpouseName: "",
-    panNumber: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      phone: "",
+      alternateContact: "",
+      email: "",
+      gender: "",
+      motherName: "",
+      maritalStatus: "",
+      SpouseName: "",
+      panNumber: "",
 
-    // Address Information
-    currentAddress: "",
-    currentAddressPincode: "",
-    currentAddressOwnRented: "",
-    currentAddressStability: "",
-    currentAddressLandmark: "",
-    permanentAddress: "",
-    permanentAddressPincode: "",
-    permanentAddressOwnRented: "",
-    permanentAddressStability: "",
-    permanentAddressLandmark: "",
+      // Address Information
+      currentAddress: "",
+      currentAddressPincode: "",
+      currentAddressOwnRented: "",
+      currentAddressStability: "",
+      currentAddressLandmark: "",
+      permanentAddress: "",
+      permanentAddressPincode: "",
+      permanentAddressOwnRented: "",
+      permanentAddressStability: "",
+      permanentAddressLandmark: "",
 
-    // Business Information
-    businessName: "",
-    businessAddress: "",
-    businessLandmark: "",
-    businessVintage: "",
+      // Business Information
+      businessName: "",
+      businessAddress: "",
+      businessLandmark: "",
+      businessVintage: "",
 
-    // Documents
-    aadharFront: null,
-    aadharBack: null,
-    panCard: null,
-    addressProof: null,
-    lightBill: null,
-    utilityBill: null,
-    rentAgreement: null,
+      // Documents
+      aadharFront: null,
+      aadharBack: null,
+      panCard: null,
+      addressProof: null,
+      lightBill: null,
+      utilityBill: null,
+      rentAgreement: null,
 
-    // Address Proof Checkboxes
-    lightBillSelected: false,
-    utilityBillSelected: false,
-    rentAgreementSelected: false,
-    shopPhoto: null,
-    shopAct: null,
-    udhyamAadhar: null,
-    itr: null,
-    gstNumber: "",
-    gstDoc: null,
-    bankStatementFile1: null,
-    bankStatementFile2: null,
-    businessOtherDocs: null,
-    selfie: null,
+      // Address Proof Checkboxes
+      lightBillSelected: false,
+      utilityBillSelected: false,
+      rentAgreementSelected: false,
+      shopPhoto: null,
+      shopAct: null,
+      udhyamAadhar: null,
+      itr: null,
+      gstNumber: "",
+      gstDoc: null,
+      bankStatementFile1: null,
+      bankStatementFile2: null,
+      businessOtherDocs: null,
+      selfie: null,
 
-    // Co-applicant (for female applicants)
-    coApplicantAadharFront: null,
-    coApplicantAadharBack: null,
-    coApplicantPan: null,
-    coApplicantMobile: "",
-    coApplicantSelfie: null,
+      // Co-applicant (for female applicants)
+      coApplicantAadharFront: null,
+      coApplicantAadharBack: null,
+      coApplicantPan: null,
+      coApplicantMobile: "",
+      coApplicantSelfie: null,
 
-    // Legacy fields (keeping for compatibility)
-    password: "",
-    confirmPassword: "",
-    fullName: "",
-    dob: "",
-    shopName: "",
-    reference1Name: "",
-    reference1Contact: "",
-    reference2Name: "",
-    reference2Contact: "",
-    otherDocs: null,
-    annualTurnover: "",
+      // Legacy fields (keeping for compatibility)
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      dob: "",
+      shopName: "",
+      reference1Name: "",
+      reference1Contact: "",
+      reference2Name: "",
+      reference2Contact: "",
+      otherDocs: null,
+      annualTurnover: "",
     })
   }
-
-
 
 
   const checkFileSize = (files) => {
@@ -701,6 +766,9 @@ export default function HomeLoanSelfEmployee() {
                     placeholder="Enter your first name"
                     required
                   />
+
+                  {formData.firstName ? " " : renderError('firstName')}
+
                 </div>
                 {/* Middle Name */}
                 <div>
@@ -744,6 +812,8 @@ export default function HomeLoanSelfEmployee() {
                     placeholder="Enter your last name"
                     required
                   />
+
+                  {formData.lastName ? "" : renderError('lastName')}
                 </div>
                 {/* Mother Name */}
                 <div>
@@ -766,6 +836,8 @@ export default function HomeLoanSelfEmployee() {
                     placeholder="Enter your mother's name"
                     required
                   />
+
+                  {formData.motherName ? "" : renderError('motherName')}
                 </div>
                 {/* PAN Number */}
                 <div>
@@ -788,6 +860,8 @@ export default function HomeLoanSelfEmployee() {
                     placeholder="Enter your PAN number"
                     required
                   />
+
+                  {formData.panNumber ? "" : renderError('panNumber')}
                 </div>
                 {/* Gender */}
                 <div>
@@ -813,6 +887,8 @@ export default function HomeLoanSelfEmployee() {
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                   </select>
+
+                  {formData.gender ? "" : renderError('gender')}
                 </div>
                 {/* Marital Status */}
                 <div>
@@ -838,6 +914,8 @@ export default function HomeLoanSelfEmployee() {
                     <option value="married">Married</option>
                     <option value="other">Other</option>
                   </select>
+
+                  {formData.maritalStatus ? "" : renderError('maritalStatus')}
                 </div>
                 {/* Password fields removed as not required here */}
                 {/* Contact Number */}
@@ -866,6 +944,8 @@ export default function HomeLoanSelfEmployee() {
                       placeholder="Enter your contact number"
                       required
                     />
+
+                    {formData.phone ? "" : renderError('phone')}
                   </div>
                 </div>
                 {/* Alternate Contact */}
@@ -921,6 +1001,8 @@ export default function HomeLoanSelfEmployee() {
                       placeholder="Enter your email address"
                       required
                     />
+
+                    {formData.email ? "" : renderError("email")}
                   </div>
                 </div>
                 {/* Referral moved to end */}
@@ -933,6 +1015,7 @@ export default function HomeLoanSelfEmployee() {
                     >
                       Spouse Name *
                     </label>
+
                     <input
                       type="text"
                       name="SpouseName"
@@ -946,6 +1029,9 @@ export default function HomeLoanSelfEmployee() {
                       placeholder="Enter Spouse's name"
                       required
                     />
+
+                    {renderError('SpouseName')}
+
                   </div>
                 )}
               </div>
@@ -994,6 +1080,8 @@ export default function HomeLoanSelfEmployee() {
                         placeholder="Enter your current address"
                         required
                       />
+
+                      {formData.currentAddress ? "" : renderError('currentAddress')}
                     </div>
                     <div>
                       <label
@@ -1015,6 +1103,8 @@ export default function HomeLoanSelfEmployee() {
                         placeholder="Enter pincode"
                         required
                       />
+
+                      {formData.currentAddressPincode ? "" : renderError('currentAddressPincode')}
                     </div>
                     <div>
                       <label
@@ -1038,6 +1128,8 @@ export default function HomeLoanSelfEmployee() {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
+
+                      {formData.currentAddressOwnRented ? "" : renderError('currentAddressOwnRented')}
                     </div>
                     <div>
                       <label
@@ -1059,6 +1151,8 @@ export default function HomeLoanSelfEmployee() {
                         placeholder="e.g., 2 years"
                         required
                       />
+
+                      {formData.currentAddressStability ? "" : renderError('currentAddressStability')}
                     </div>
                     <div>
                       <label
@@ -1135,6 +1229,8 @@ export default function HomeLoanSelfEmployee() {
                         disabled={sameAddress}
                         required
                       />
+
+                      {formData.permanentAddress ? "" : renderError('permanentAddress')}
                     </div>
                     <div>
                       <label
@@ -1157,6 +1253,8 @@ export default function HomeLoanSelfEmployee() {
                         disabled={sameAddress}
                         required
                       />
+
+                      {formData.permanentAddressPincode ? "" : renderError('permanentAddressPincode')}
                     </div>
                     <div>
                       <label
@@ -1181,6 +1279,8 @@ export default function HomeLoanSelfEmployee() {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
+
+                      {formData.permanentAddressOwnRented ? "" : renderError('permanentAddressOwnRented')}
                     </div>
                     <div>
                       <label
@@ -1203,6 +1303,8 @@ export default function HomeLoanSelfEmployee() {
                         disabled={sameAddress}
                         required
                       />
+
+                      {formData.permanentAddressStability ? "" : renderError('permanentAddressStability')}
                     </div>
                     <div>
                       <label
@@ -1266,6 +1368,8 @@ export default function HomeLoanSelfEmployee() {
                     min="0"
                     required
                   />
+
+                  {formData.loanAmount ? "" : renderError('loanAmount')}
                 </div>
               </div>
             </section>
@@ -1388,6 +1492,15 @@ export default function HomeLoanSelfEmployee() {
                     />
                   )}
                 </div>
+
+                {/* Error message */}
+                {!formData.lightBill &&
+                  !formData.utilityBill &&
+                  !formData.rentAgreement &&
+                  fieldErrors.addressProof && (
+                    <p className="text-red-500 text-sm">{fieldErrors.addressProof}</p>
+                  )}
+
               </div>
             </section>
 
@@ -1407,7 +1520,7 @@ export default function HomeLoanSelfEmployee() {
                     className="block text-sm font-medium mb-2"
                     style={{ color: "#111827" }}
                   >
-                    Aadhar Front
+                    Aadhar Front *
                   </label>
                   <div className="relative">
                     <input
@@ -1439,6 +1552,7 @@ export default function HomeLoanSelfEmployee() {
                       <span>✓</span> {formData.aadharFront.name}
                     </p>
                   )}
+                    {formData.aadharFront?"": renderError('aadharFront')}
                 </div>
                 {/* Aadhar Back */}
                 <div>
@@ -1446,7 +1560,7 @@ export default function HomeLoanSelfEmployee() {
                     className="block text-sm font-medium mb-2"
                     style={{ color: "#111827" }}
                   >
-                    Aadhar Back
+                    Aadhar Back *
                   </label>
                   <div className="relative">
                     <input
@@ -1478,6 +1592,8 @@ export default function HomeLoanSelfEmployee() {
                       <span>✓</span> {formData.aadharBack.name}
                     </p>
                   )}
+
+                  {formData.aadharBack?"": renderError('aadharBack')}
                 </div>
                 {/* Other Docs */}
                 <div>
@@ -1536,6 +1652,8 @@ export default function HomeLoanSelfEmployee() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+
+                  {formData.panCard ? "" : renderError('panCard')}
                 </div>
                 {/* Selfie Upload */}
                 <div>
@@ -1575,6 +1693,8 @@ export default function HomeLoanSelfEmployee() {
                       <span>✓</span> {formData.selfie.name}
                     </p>
                   )}
+
+                  {formData.selfie ? "" : renderError('selfie')}
                 </div>
               </div>
             </section>
@@ -1741,6 +1861,7 @@ export default function HomeLoanSelfEmployee() {
                       placeholder="Enter your business name"
                       required
                     />
+                    {formData.businessName ? "" : renderError('businessName')}
                   </div>
                 </div>
                 <div>
@@ -1764,6 +1885,7 @@ export default function HomeLoanSelfEmployee() {
                     min="0"
                     required
                   />
+                  {formData.businessVintage ? "" : renderError('businessVintage')}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1785,6 +1907,8 @@ export default function HomeLoanSelfEmployee() {
                     placeholder="Enter your business address"
                     required
                   />
+
+                  {formData.businessAddress ? "" : renderError('businessAddress')}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1862,6 +1986,8 @@ export default function HomeLoanSelfEmployee() {
                       placeholder="Enter annual turnover in INR"
                       required
                     />
+
+                    {formData.annualTurnover ? " " : renderError('annualTurnover')}
                   </div>
                 </div>
               </div>
@@ -1896,6 +2022,7 @@ export default function HomeLoanSelfEmployee() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                  {formData.shopAct ? " " : renderError('shopAct')}
                 </div>
                 <div>
                   <label
@@ -1916,6 +2043,7 @@ export default function HomeLoanSelfEmployee() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+                  {formData.udhyamAadhar ? "" : renderError('udhyamAadhar')}
                 </div>
                 <div>
                   <label
@@ -1936,6 +2064,8 @@ export default function HomeLoanSelfEmployee() {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
+
+                  {formData.itr ? "" : renderError('itr')}
                 </div>
                 <div>
                   <label
@@ -1980,6 +2110,8 @@ export default function HomeLoanSelfEmployee() {
                       accept=".jpg,.jpeg,.png"
                       required
                     />
+
+                    {formData.shopPhoto ? "" : renderError('shopPhoto')}
                   </div>
                 </div>
                 <div>
@@ -2039,6 +2171,8 @@ export default function HomeLoanSelfEmployee() {
                   >
                     Upload last 12 months bank statement
                   </p>
+
+                  {formData.bankStatementFile1 ? "" : renderError('bankStatementFile1')}
                 </div>
                 <div>
                   <label
@@ -2103,6 +2237,8 @@ export default function HomeLoanSelfEmployee() {
                         placeholder="Enter reference name"
                         required
                       />
+
+                      {formData.reference1Name ? "" : renderError('reference1Name')}
                     </div>
                     <div>
                       <label
@@ -2129,6 +2265,8 @@ export default function HomeLoanSelfEmployee() {
                           placeholder="Enter contact number"
                           required
                         />
+
+                        {formData.reference1Contact ? "" : renderError('reference1Contact')}
                       </div>
                     </div>
                   </div>
@@ -2164,6 +2302,8 @@ export default function HomeLoanSelfEmployee() {
                         placeholder="Enter reference name"
                         required
                       />
+
+                      {formData.reference2Name ? "" : renderError('reference2Name')}
                     </div>
                     <div>
                       <label
@@ -2190,6 +2330,8 @@ export default function HomeLoanSelfEmployee() {
                           placeholder="Enter contact number"
                           required
                         />
+
+                        {formData.reference2Contact ? " " : renderError('reference2Contact')}
                       </div>
                     </div>
                   </div>

@@ -204,7 +204,7 @@ const RmSidebar = () => {
 
 
       const response = await axios.post(
-        "http://localhost:5000/api/auth/change-password",
+        `${backendurl}/auth/change-password`,
         {
           oldPassword: formData.oldPassword,
           newPassword: formData.password,
