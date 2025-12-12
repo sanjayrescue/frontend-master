@@ -1,6 +1,6 @@
 //updTED CODE
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   User,
   Phone,
@@ -118,6 +118,16 @@ export default function HomeLoanSelfEmployee() {
   const [successMessage, setSuccessMessage] = useState("");
   const [savedApplication, setSavedApplication] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const abortControllerRef = useRef(null);
+
+  // Cleanup function to cancel pending requests
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // const handleInputChange = (e) => {
   //     const { name, value } = e.target;
@@ -597,8 +607,24 @@ export default function HomeLoanSelfEmployee() {
           "Content-Type": "multipart/form-data",
         };
 
+      // Create AbortController for request cancellation
+      abortControllerRef.current = new AbortController();
+
       const response = await axios.post(endpoint, formDataToSend, {
         headers,
+        timeout: 120000, // 120 seconds timeout for file uploads
+        maxContentLength: 100 * 1024 * 1024, // 100MB max content length
+        maxBodyLength: 100 * 1024 * 1024, // 100MB max body length
+        signal: abortControllerRef.current.signal,
+        onUploadProgress: (progressEvent) => {
+          // Optional: You can add progress tracking here if needed
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            // console.log(`Upload progress: ${percentCompleted}%`);
+          }
+        },
       });
       const data = response.data;
 
@@ -609,12 +635,27 @@ export default function HomeLoanSelfEmployee() {
       );
       setModalOpen(true);
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Something went wrong."
-      );
-      setValidationErrors(err.response?.data?.errors || []);
+      // Handle different error types
+      if (axios.isCancel(err)) {
+        setError("Request was cancelled. Please try again.");
+      } else if (err.code === 'ECONNABORTED') {
+        setError("Request timeout. Please check your connection and try again.");
+      } else if (err.response) {
+        // Server responded with error status
+        setError(
+          err.response?.data?.message || err.message || "Something went wrong."
+        );
+        setValidationErrors(err.response?.data?.errors || []);
+      } else if (err.request) {
+        // Request was made but no response received
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        // Something else happened
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -628,6 +669,9 @@ export default function HomeLoanSelfEmployee() {
         setModalOpen(false);
         return;
       }
+      // Create AbortController for request cancellation
+      abortControllerRef.current = new AbortController();
+
       await axios.post(
         `${backendurl}/partner/applications/${applicationId}/submit`,
         {},
@@ -635,18 +679,32 @@ export default function HomeLoanSelfEmployee() {
           headers: {
             Authorization: `Bearer ${partnerToken}`,
           },
+          timeout: 30000, // 30 seconds timeout
+          signal: abortControllerRef.current.signal,
         }
       );
       setModalOpen(false);
       setSuccessMessage("Application submitted successfully.");
       resetFields();
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Something went wrong."
-      );
-      setValidationErrors(err.response?.data?.errors || []);
+      // Handle different error types
+      if (axios.isCancel(err)) {
+        setError("Request was cancelled. Please try again.");
+      } else if (err.code === 'ECONNABORTED') {
+        setError("Request timeout. Please check your connection and try again.");
+      } else if (err.response) {
+        setError(
+          err.response?.data?.message || err.message || "Something went wrong."
+        );
+        setValidationErrors(err.response?.data?.errors || []);
+      } else if (err.request) {
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
