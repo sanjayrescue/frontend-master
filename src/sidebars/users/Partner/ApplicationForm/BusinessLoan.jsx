@@ -259,9 +259,24 @@ function validateForm(formData) {
   if (!formData.loanAmount) errors.loanAmount = "loan Amount is required.";
 
   // Personal Documents.......
+
+  if (!formData.aadharFront) errors.aadharFront = "Aadhar Front is required.";
+
+  if (!formData.aadharBack) errors.aadharBack = "Aadhar Back is required.";
+  
   if (!formData.panCard) errors.panCard = "PAN Card is required.";
 
   if (!formData.selfie) errors.selfie = "Selfie  is required.";
+
+  // Co-applicant Information (only for female applicants)
+  if (formData.gender === "female") {
+    if (!formData.coApplicantAadharFront) errors.coApplicantAadharFront = "Aadhar Front is required.";
+    if (!formData.coApplicantAadharBack) errors.coApplicantAadharBack = "Aadhar Back is required.";
+    if (!formData.coApplicantPan) errors.coApplicantPan = "PAN  is required.";
+    if (!formData.coApplicantMobile) errors.coApplicantMobile = "Contact is required.";
+    if (!formData.coApplicantSelfie) errors.coApplicantSelfie = "Selfie is required.";
+  }
+
 
   // Business Information...
 
@@ -308,7 +323,7 @@ function validateForm(formData) {
 
 const handleSubmit = async () => {
   console.log("working");
-  
+
   setLoading(true);
   setError("");
   setValidationErrors([]);
@@ -316,29 +331,127 @@ const handleSubmit = async () => {
   setSavedApplication(null);
 
   try {
-   
-
-      const errors = validateForm(formData);
-
-if (Object.keys(errors).length > 0) {
-  setValidationErrors(errors);
-  setLoading(false);
-  return;
-
-
-    }
-
-    // If API/general error already exists
-    if (error) {
-      setValidationErrors([error]);
+    // 1) Validate form
+    const errors = validateForm(formData);
+    if (Object.keys(errors).length > 0) {
+      console.warn("Validation errors:", errors);
+      setValidationErrors(errors);
       setLoading(false);
       return;
     }
 
-   
-    setSuccessMessage("Application submitted successfully!");
+    // 2) Build payload
+    const applicationData = {
+      loanType: "BUSINESS",
+      partnerReferralCode: isPartnerLoggedIn
+        ? undefined
+        : formData.partnerReferralCode?.trim() || undefined,
+      customer: {
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        mothersName: formData.motherName,
+        phone: formData.phone,
+        alternatePhone: formData.alternateContact,
+        email: formData.email,
+        panNumber: formData.panNumber,
+        gender: formData.gender,
+        maritalStatus: formData.maritalStatus,
+        spouseName: formData.SpouseName,
+        dateOfBirth: formData.dob,
+        currentAddress: formData.currentAddress,
+        currentAddressPinCode: formData.currentAddressPincode,
+        currentAddressHouseStatus: formData.currentAddressOwnRented,
+        currentAddressLandmark: formData.currentAddressLandmark,
+        stabilityOfResidency: formData.currentAddressStability,
+        permanentAddress: formData.permanentAddress,
+        permanentAddressPinCode: formData.permanentAddressPincode,
+        permanentAddressHouseStatus: formData.permanentAddressOwnRented,
+        permanentAddressLandmark: formData.permanentAddressLandmark,
+        permanentAddressStability: formData.permanentAddressStability,
+        loanAmount: formData.loanAmount || 0,
+      },
+      product: {
+        businessName: formData.businessName,
+        businessAddress: formData.businessAddress,
+        businessLandmark: formData.businessLandmark,
+        businessVintage: formData.businessVintage,
+        annualTurnover: formData.annualTurnover,
+        gstNumber: formData.gstNumber,
+      },
+      references: [
+        { name: formData.reference1Name, phone: formData.reference1Contact },
+        { name: formData.reference2Name, phone: formData.reference2Contact },
+      ],
+      docs: [],
+    };
+
+    // 3) Build FormData with files
+    const formDataToSend = new FormData();
+    formDataToSend.append("data", JSON.stringify(applicationData));
+
+    const docsQueue = [
+      { file: formData.aadharFront, type: "AADHAR_FRONT" },
+      { file: formData.aadharBack, type: "AADHAR_BACK" },
+      { file: formData.panCard, type: "PAN" },
+      { file: formData.selfie, type: "SELFIE" },
+      { file: formData.addressProof, type: "ADDRESS_PROOF" },
+      { file: formData.lightBill, type: "LIGHT_BILL" },
+      { file: formData.utilityBill, type: "UTILITY_BILL" },
+      { file: formData.rentAgreement, type: "RENT_AGREEMENT" },
+      { file: formData.shopPhoto, type: "SHOP_PHOTO" },
+      { file: formData.shopAct, type: "SHOP_ACT" },
+      { file: formData.udhyamAadhar, type: "UDHYAM_AADHAR" },
+      { file: formData.itr, type: "ITR" },
+      { file: formData.gstDoc, type: "GST_DOC" },
+      { file: formData.bankStatementFile1, type: "BANK_STATEMENT_1" },
+      { file: formData.bankStatementFile2, type: "BANK_STATEMENT_2" },
+      { file: formData.businessOtherDocs, type: "BUSINESS_OTHER_DOCS" },
+      // Co-applicant docs (if any)
+      { file: formData.coApplicantAadharFront, type: "CO_APPLICANT_AADHAR_FRONT" },
+      { file: formData.coApplicantAadharBack, type: "CO_APPLICANT_AADHAR_BACK" },
+      { file: formData.coApplicantPan, type: "CO_APPLICANT_PAN" },
+      { file: formData.coApplicantSelfie, type: "CO_APPLICANT_SELFIE" },
+    ];
+
+    docsQueue.forEach(({ file, type }) => {
+      if (file) {
+        formDataToSend.append("docs", file);
+        formDataToSend.append("docTypes", type);
+      }
+    });
+
+    if (!checkFileSize(docsQueue)) {
+      setLoading(false);
+      return;
+    }
+
+    // 4) Send to backend
+    const endpoint = isPartnerLoggedIn
+      ? `${backendurl}/partner/create-applications`
+      : `${backendurl}/partner/public/create-application`;
+
+    const headers = isPartnerLoggedIn
+      ? {
+          Authorization: `Bearer ${partnerToken}`,
+          "Content-Type": "multipart/form-data",
+        }
+      : { "Content-Type": "multipart/form-data" };
+
+    const response = await axios.post(endpoint, formDataToSend, { headers });
+    const data = response.data;
+
+    setApplicationId(data.id);
+    setSavedApplication(data);
+    setSuccessMessage(
+      data.message || "Application saved successfully. You can submit now."
+    );
+    setModalOpen(true);
   } catch (err) {
-    setError("Something went wrong. Please try again.");
+    setError(
+      err.response?.data?.message || err.message || "Failed to save application. Try again."
+    );
+    setValidationErrors(err.response?.data?.errors || []);
   } finally {
     setLoading(false);
   }
@@ -555,7 +668,7 @@ if (Object.keys(errors).length > 0) {
                     placeholder="Enter your first name"
                     required
                   />
-                   {renderError("firstName")}
+                   {formData.firstName ? "" : renderError("firstName")}
                 </div>
                 {/* Middle Name */}
                 <div>
@@ -599,7 +712,7 @@ if (Object.keys(errors).length > 0) {
                     placeholder="Enter your last name"
                     required
                   />
-                  {renderError("lastName")}
+                  {formData.lastName ? "" : renderError("lastName")}
                 </div>
                 {/* Mother Name */}
                 <div>
@@ -622,7 +735,7 @@ if (Object.keys(errors).length > 0) {
                     placeholder="Enter your mother's name"
                     required
                   />
-                  {renderError("motherName")}
+                  {formData.motherName ? "" : renderError("motherName")}
                 </div>
                 {/* PAN Number */}
                 <div>
@@ -645,7 +758,7 @@ if (Object.keys(errors).length > 0) {
                     placeholder="Enter your PAN number"
                     required
                   />
-                   {renderError("panNumber")}
+                   { formData.panNumber ? "" : renderError("panNumber")}
                 </div>
                 {/* Gender */}
                 <div>
@@ -671,7 +784,7 @@ if (Object.keys(errors).length > 0) {
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                   </select>
-                  {renderError("gender")}
+                  {formData.gender ? "" : renderError("gender")}
                 </div>
                 {/* Marital Status */}
                 <div>
@@ -697,7 +810,7 @@ if (Object.keys(errors).length > 0) {
                     <option value="married">Married</option>
                     <option value="other">Other</option>
                   </select>
-                  {renderError("maritalStatus")}
+                  {formData.maritalStatus ? "" : renderError("maritalStatus")}
                 </div>
                 {/* Password fields removed as not required here */}
                 {/* Contact Number */}
@@ -726,7 +839,7 @@ if (Object.keys(errors).length > 0) {
                       placeholder="Enter your contact number"
                       required
                     />
-                     {renderError("phone")}
+                     {formData.phone ? "" : renderError("phone")}
                   </div>
                 </div>
                 {/* Alternate Contact */}
@@ -782,7 +895,7 @@ if (Object.keys(errors).length > 0) {
                       placeholder="Enter your email address"
                       required
                     />
-                     {renderError("email")}
+                     { formData.email ? "" : renderError("email")}
                   </div>
                 </div>
                 {/* Referral moved to end */}
@@ -856,7 +969,7 @@ if (Object.keys(errors).length > 0) {
                         placeholder="Enter your current address"
                         required
                       />
-                       {renderError("currentAddress")}
+                       {formData.currentAddress ? "" : renderError("currentAddress")}
                     </div>
                     <div>
                       <label
@@ -878,7 +991,7 @@ if (Object.keys(errors).length > 0) {
                         placeholder="Enter pincode"
                         required
                       />
-                       {renderError("currentAddressPincode")}
+                       {formData.currentAddressPincode ? "" : renderError("currentAddressPincode")}
                     </div>
                     <div>
                       <label
@@ -902,7 +1015,7 @@ if (Object.keys(errors).length > 0) {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
-                      {renderError("currentAddressOwnRented")}
+                      {formData.currentAddressOwnRented ? "" : renderError("currentAddressOwnRented")}
                     </div>
                     <div>
                       <label
@@ -924,7 +1037,7 @@ if (Object.keys(errors).length > 0) {
                         placeholder="e.g., 2 years"
                         required
                       />
-                        {renderError("currentAddressStability")}
+                        {formData.currentAddressStability ? "" : renderError("currentAddressStability")}
                     </div>
                     <div>
                       <label
@@ -1001,7 +1114,7 @@ if (Object.keys(errors).length > 0) {
                         disabled={sameAddress}
                         required
                       />
-                       {renderError("permanentAddress")}
+                       { formData.permanentAddress ? "" : renderError("permanentAddress")}
                     </div>
                     <div>
                       <label
@@ -1024,7 +1137,7 @@ if (Object.keys(errors).length > 0) {
                         disabled={sameAddress}
                         required
                       />
-                      {renderError("permanentAddressPincode")}
+                      {formData.permanentAddressPincode ? "" : renderError("permanentAddressPincode")}
                     </div>
                     <div>
                       <label
@@ -1049,7 +1162,7 @@ if (Object.keys(errors).length > 0) {
                         <option value="own">Own</option>
                         <option value="rented">Rented</option>
                       </select>
-                      {renderError("permanentAddressOwnRented")}
+                      {formData.permanentAddressOwnRented ? "" : renderError("permanentAddressOwnRented")}
                     </div>
                     <div>
                       <label
@@ -1072,7 +1185,7 @@ if (Object.keys(errors).length > 0) {
                         disabled={sameAddress}
                         required
                       />
-                       {renderError("permanentAddressStability")}
+                       {formData.permanentAddressStability ? "" : renderError("permanentAddressStability")}
                     </div>
                     <div>
                       <label
@@ -1136,7 +1249,7 @@ if (Object.keys(errors).length > 0) {
                     min="0"
                     required
                   />
-                  {renderError("loanAmount")}
+                  {formData?.loanAmount ? "" : renderError("loanAmount")}
                 </div>
               </div>
             </section>
@@ -1278,7 +1391,7 @@ if (Object.keys(errors).length > 0) {
                     className="block text-sm font-medium mb-2"
                     style={{ color: "#111827" }}
                   >
-                    Aadhar Front
+                    Aadhar Front *
                   </label>
                   <div className="relative">
                     <input
@@ -1293,6 +1406,7 @@ if (Object.keys(errors).length > 0) {
                       accept=".pdf,.jpg,.jpeg,.png"
                       required
                     />
+                      {formData.aadharFront ? "" : renderError("aadharFront")}
                     {formData.aadharFront && (
                       <button
                         type="button"
@@ -1317,7 +1431,7 @@ if (Object.keys(errors).length > 0) {
                     className="block text-sm font-medium mb-2"
                     style={{ color: "#111827" }}
                   >
-                    Aadhar Back
+                    Aadhar Back *
                   </label>
                   <div className="relative">
                     <input
@@ -1332,6 +1446,7 @@ if (Object.keys(errors).length > 0) {
                       accept=".pdf,.jpg,.jpeg,.png"
                       required
                     />
+                      { formData.aadharBack ? "" : renderError("aadharBack")}
                     {formData.aadharBack && (
                       <button
                         type="button"
@@ -1407,7 +1522,7 @@ if (Object.keys(errors).length > 0) {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
-                   {renderError("panCard")}
+                   {formData.panCard ? "" : renderError("panCard")}
                 </div>
                 {/* Selfie Upload */}
                 <div>
@@ -1441,7 +1556,7 @@ if (Object.keys(errors).length > 0) {
                         <X className="w-5 h-5" />
                       </button>
                     )}
-                     {renderError("selfie")}
+                     {formData.selfie ? "" : renderError("selfie")}
 
                   </div>
                   {formData.selfie && (
@@ -1487,6 +1602,7 @@ if (Object.keys(errors).length > 0) {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      { formData.coApplicantAadharFront ? "" : renderError("coApplicantAadharFront")}
                     </div>
                     <div>
                       <label
@@ -1507,6 +1623,7 @@ if (Object.keys(errors).length > 0) {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                           { formData.coApplicantAadharBack ? "" : renderError("coApplicantAadharBack")}
                     </div>
                     <div>
                       <label
@@ -1527,6 +1644,7 @@ if (Object.keys(errors).length > 0) {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                        { formData.coApplicantPan ? "" : renderError("coApplicantPan")}
                     </div>
                     <div>
                       <label
@@ -1553,6 +1671,7 @@ if (Object.keys(errors).length > 0) {
                           placeholder="Enter co-applicant mobile number"
                           required
                         />
+                         { formData.coApplicantMobile ? "" : renderError("coApplicantMobile")}
                       </div>
                     </div>
                     <div>
@@ -1574,6 +1693,7 @@ if (Object.keys(errors).length > 0) {
                         accept=".jpg,.jpeg,.png"
                         required
                       />
+                        { formData.coApplicantSelfie ? "" : renderError("coApplicantSelfie")}
                     </div>
                   </div>
                 </div>
@@ -1615,7 +1735,7 @@ if (Object.keys(errors).length > 0) {
                       placeholder="Enter your business name"
                       required
                     />
-                      {renderError("businessName")}
+                      {formData.businessName ? "" : renderError("businessName")}
                   </div>
                 </div>
                 <div>
@@ -1639,7 +1759,7 @@ if (Object.keys(errors).length > 0) {
                     min="0"
                     required
                   />
-                    {renderError("businessVintage")}
+                    { formData.businessVintage ? "" : renderError("businessVintage")}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1661,7 +1781,7 @@ if (Object.keys(errors).length > 0) {
                     placeholder="Enter your business address"
                     required
                   />
-                    {renderError("businessAddress")}
+                    {formData.businessAddress ? "" : renderError("businessAddress")}
                 </div>
                 <div className="md:col-span-2">
                   <label
@@ -1739,7 +1859,7 @@ if (Object.keys(errors).length > 0) {
                       placeholder="Enter annual turnover in INR"
                       required
                     />
-                      {renderError("annualTurnover")}
+                      {formData.annualTurnover ? "" : renderError("annualTurnover")}
                   </div>
                 </div>
               </div>
@@ -1774,7 +1894,7 @@ if (Object.keys(errors).length > 0) {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
-                    {renderError("shopAct")}
+                    {formData.shopAct ? "" : renderError("shopAct")}
                 </div>
                 <div>
                   <label
@@ -1795,7 +1915,7 @@ if (Object.keys(errors).length > 0) {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
-                     {renderError("udhyamAadhar")}
+                     { formData.udhyamAadhar ?  "" : renderError("udhyamAadhar")}
                 </div>
                 <div>
                   <label
@@ -1816,7 +1936,7 @@ if (Object.keys(errors).length > 0) {
                     accept=".pdf,.jpg,.jpeg,.png"
                     required
                   />
-                    {renderError("itr")}
+                    { formData.itr ? "" : renderError("itr")}
                 </div>
                 <div>
                   <label
@@ -1861,7 +1981,7 @@ if (Object.keys(errors).length > 0) {
                       accept=".jpg,.jpeg,.png"
                       required
                     />
-                       {renderError("shopPhoto")}
+                       {formData.shopPhoto ? "" : renderError("shopPhoto")}
                   </div>
                 </div>
                 <div>
@@ -1921,7 +2041,7 @@ if (Object.keys(errors).length > 0) {
                   >
                     Upload last 12 months bank statement
                   </p>
-                  {renderError("bankStatementFile1")}
+                  { formData.bankStatementFile1 ? "" : renderError("bankStatementFile1")}
                 </div>
                 <div>
                   <label
@@ -1986,7 +2106,7 @@ if (Object.keys(errors).length > 0) {
                         placeholder="Enter reference name"
                         required
                       />
-                      {renderError("reference1Name")}
+                      { formData.reference1Name ? "" : renderError("reference1Name")}
                     </div>
                     <div>
                       <label
@@ -2013,7 +2133,7 @@ if (Object.keys(errors).length > 0) {
                           placeholder="Enter contact number"
                           required
                         />
-                        {renderError("reference1Contact")}
+                        {formData.reference1Contact ? "" : renderError("reference1Contact")}
                       </div>
                     </div>
                   </div>
@@ -2049,7 +2169,7 @@ if (Object.keys(errors).length > 0) {
                         placeholder="Enter reference name"
                         required
                       />
-                           {renderError("reference2Name")}
+                           {formData.reference2Name ? "" : renderError("reference2Name")}
                     </div>
                     <div>
                       <label
@@ -2076,7 +2196,7 @@ if (Object.keys(errors).length > 0) {
                           placeholder="Enter contact number"
                           required
                         />
-                         {renderError("reference2Contact")}
+                         {formData.reference2Contact ? "" : renderError("reference2Contact")}
                       </div>
                     </div>
                   </div>

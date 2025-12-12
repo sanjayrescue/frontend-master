@@ -246,7 +246,7 @@ export default function PersonalLoan() {
     if (!formData.stabilityOfResidency) errors.stabilityOfResidency = "Stability of Residency is required.";
     if (!formData.currentHouseStatus) errors.currentHouseStatus = "Current House Status is required.";
     if (!formData.currentLandmark) errors.currentLandmark = "Landmark is required.";
-    if (!formData.pinCode) errors.pinCode = "Pin Code is required.";
+    if (!formData.currentAddressPinCode) errors.currentAddressPinCode = "Pin Code is required.";
     if (!formData.permanentHouseStatus) errors.permanentHouseStatus = "Permanent House Status is required.";
     if (!formData.permanentLandmark) errors.permanentLandmark = "Landmark is required.";
     if (!formData.permanentStability) errors.permanentStability = "Stability is required.";
@@ -291,26 +291,17 @@ export default function PersonalLoan() {
 
 
     // Mandatory document validation
-    if (!formData.documents) {
-      errors.documents = "Aadhar front is required.";
-    }
-
-    if (!formData.documents) {
-      errors.documents = "Aadhar back is required.";
-    }
-
-    if (!formData.documents) {
-      errors.documents = "PAN card is required.";
-    }
-
-    if (!formData.documents) {
-      errors.documents = "Passport-size photo is required.";
-    }
+    if (!formData.aadharFront) errors.aadharFront = "Aadhar front is required.";
+    if (!formData.aadharBack) errors.aadharBack = "Aadhar back is required.";
+    if (!formData.panCard) errors.panCard = "PAN card is required.";
+    if (!formData.passportPhoto) errors.passportPhoto = "Passport-size photo is required.";
 
     return errors;
   }
 
   const handleSubmit = async () => {
+    console.log("working");
+    
     setLoading(true);
     setError("");
     setFieldErrors({});
@@ -1107,7 +1098,7 @@ export default function PersonalLoan() {
                           placeholder="Enter pin code"
                           required
                         />
-                        {renderError("pinCode")}
+                        {renderError("currentAddressPinCode")}
                       </div>
                     </div>
                   </div>
@@ -1294,7 +1285,9 @@ export default function PersonalLoan() {
                       min="0"
                       required
                     />
-                    {renderError("loanAmount")}
+
+
+                    {formData.loanAmount ? "" : renderError("loanAmount")}
                   </div>
                 </div>
               </section>
@@ -1355,7 +1348,7 @@ export default function PersonalLoan() {
                           accept={doc.accept || ".pdf,.jpg,.jpeg,.png"}
                           required={doc.required}
                         />
-                        {renderError("documents")}
+                        {formData[doc.name]? "" : renderError(doc.name)}
 
                         {/* View Button */}
                         {formData[doc.name] && (
@@ -1618,7 +1611,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-                      {renderError("companyIdCard")}
+                      {formData.companyIdCard ? "" : renderError("companyIdCard")}
 
                       {/* Action Buttons */}
                       {formData.companyIdCard && (
@@ -1704,7 +1697,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-                      {renderError("salarySlip1")}
+                      { formData.salarySlip1 ? "" : renderError("salarySlip1")}
 
                       {/* Action Buttons */}
                       {formData.salarySlip1 && (
@@ -1790,8 +1783,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-                      {renderError("salarySlip2")}
-
+                        { formData.salarySlip2 ? "" : renderError("salarySlip2")}
                       {/* Action Buttons */}
                       {formData.salarySlip2 && (
                         <div className="flex items-center gap-1">
@@ -1876,8 +1868,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-                      {renderError("salarySlip3")}
-
+                     { formData.salarySlip3 ? "" : renderError("salarySlip3")}
 
                       {/* Action Buttons */}
                       {formData.salarySlip3 && (
@@ -2060,7 +2051,7 @@ export default function PersonalLoan() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
-                      {renderError("bankStatement1")}
+                      {formData.bankStatement1 ? "" : renderError("bankStatement1")}
                       {/* Action Buttons */}
                       {formData.bankStatement1 && (
                         <div className="flex items-center gap-1">
