@@ -120,14 +120,19 @@ export default function HomeLoanSalaried() {
   const [successMessage, setSuccessMessage] = useState("");
   const [savedApplication, setSavedApplication] = useState(null);
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
+  
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "loanAmount" ? parseInt(value, 10) || 0 : value,
+      [name]:
+        name === "loanAmount"
+          ? value === ""      // if empty, keep empty string
+            ? ""
+            : parseInt(value, 10)
+          : value,
     }));
+  
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
         const next = { ...prev };
@@ -136,6 +141,7 @@ export default function HomeLoanSalaried() {
       });
     }
   };
+  
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
@@ -156,15 +162,33 @@ export default function HomeLoanSalaried() {
     }
   };
 
+  // const handleFileChangeAddressProofs = (e) => {
+  //   const { name, files } = e.target;
+  //   if (files && files.length > 0) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       [name]: files[0], // now this updates newAddressProofs
+  //     }));
+  //   }
+  // };
+
   const handleFileChangeAddressProofs = (e) => {
-    const { name, files } = e.target;
-    if (files && files.length > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: files[0], // now this updates newAddressProofs
-      }));
-    }
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      newAddressProofs: file,   // <-- FIXED
+    }));
+
+    // OPTIONAL: clear validation error
+    setError((prev) => ({
+      ...prev,
+      newAddressProofs: "",
+    }));
   };
+
 
   const handleFileRemove = (fieldName) => {
     if (fieldName.startsWith("newAddressProofs.")) {
@@ -190,20 +214,6 @@ export default function HomeLoanSalaried() {
     }
   };
 
-  // const handleSameAddressChange = (e) => {
-  //   setSameAddress(e.target.checked);
-  //   if (e.target.checked) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       permanentAddress: prev.currentAddress,
-  //     }));
-  //   } else {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       permanentAddress: "",
-  //     }));
-  //   }
-  // };
 
   const handleSameAddressChange = (e) => {
     const checked = e.target.checked;
@@ -255,7 +265,7 @@ export default function HomeLoanSalaried() {
     if (!formData.middleName) errors.middleName = "Middle name is required";
     if (!formData.lastName) errors.lastName = "Last name is required.";
     if (!formData.motherName) errors.motherName = "Mother's name is required.";
-    if (!formData.pan) errors.pan = "PAN number is required.";
+    // if (!formData.pan) errors.pan = "PAN number is required.";
     if (!formData.gender) errors.gender = "Gender is required.";
     if (!formData.maritalStatus) errors.maritalStatus = "Marital status is required.";
 
@@ -301,8 +311,15 @@ export default function HomeLoanSalaried() {
     if (!formData.currentHouseStatus)
       errors.currentHouseStatus = "Current house status is required.";
 
-    if (!formData.currentAddressPinCode)
+    // Current Address Pin Code Validation
+
+    const pin = formData.currentAddressPinCode?.trim();
+
+    if (!pin) {
       errors.currentAddressPinCode = "Current Address Pin is required.";
+    } else if (!/^[1-9][0-9]{5}$/.test(pin)) {
+      errors.currentAddressPinCode = "Enter a valid 6-digit PIN code.";
+    }
 
     // Permanent Address — YOU WANT THESE ALWAYS VALIDATED
     if (!sameAddress) {
@@ -318,15 +335,35 @@ export default function HomeLoanSalaried() {
       if (!formData.permanentHouseStatus)
         errors.permanentHouseStatus = "Permanent house status is required.";
 
-      if (!formData.permanentAddressPinCode)
+      // Permanent Address Pin Code Validation
+      const permanentPin = formData.permanentAddressPinCode?.trim();
+
+      if (!permanentPin) {
         errors.permanentAddressPinCode = "Permanent Address Pin is required.";
+      } else if (!/^[1-9][0-9]{5}$/.test(permanentPin)) {
+        errors.permanentAddressPinCode = "Enter a valid 6-digit PIN code.";
+      }
+
     }
     // Document
 
     if (!formData.aadharFront) errors.aadharFront = "Aadhar Front is required";
     if (!formData.aadharBack) errors.aadharBack = "Aadhar Back is required";
-    if (!formData.panCard) errors.panCard = "Pan Card is required";
+
+    // PAN Card validation
+    if (!formData.pan) {
+      errors.pan = "PAN Card is required";
+    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panCard.toUpperCase())) {
+      errors.pan = "Enter a valid PAN Card number (e.g., ABCDE1234F)";
+    }
+
     if (!formData.passportPhoto) errors.passportPhoto = "Passport photo is required";
+
+    // New Address Proof Validation
+    if (!formData.newAddressProofs) {
+      errors.newAddressProofs = "At least one address proof document is required.";
+    }
+
 
     // Employment
     if (!formData.companyName) errors.companyName = "Company name is required.";
@@ -342,16 +379,20 @@ export default function HomeLoanSalaried() {
     if (!formData.salarySlip3) errors.salarySlip3 = "Salary slip 3 is required";
     // if (!formData.form16_26as) errors.form16_26as = "Form 16 is required";/
 
+    // Reference 1
+    if (!formData.reference1Name)
+      errors.reference1Name = "Reference 1 name is required.";
 
-    // References
-    if (!formData.reference1Name) errors.reference1Name = "Reference 1 name is required.";
     if (!formData.reference1Contact) {
       errors.reference1Contact = "Reference 1 contact is required.";
     } else if (!/^\d{10}$/.test(formData.reference1Contact)) {
       errors.reference1Contact = "Reference 1 contact must be exactly 10 digits.";
     }
 
-    if (!formData.reference2Name) errors.reference2Name = "Reference 2 name is required.";
+    // Reference 2
+    if (!formData.reference2Name)
+      errors.reference2Name = "Reference 2 name is required.";
+
     if (!formData.reference2Contact) {
       errors.reference2Contact = "Reference 2 contact is required.";
     } else if (!/^\d{10}$/.test(formData.reference2Contact)) {
@@ -359,17 +400,19 @@ export default function HomeLoanSalaried() {
     }
 
     if (
-      formData.loanAmount === "" ||
-      formData.loanAmount === null ||
-      formData.loanAmount === undefined
+      formData.reference1Contact &&
+      formData.reference2Contact &&
+      formData.reference1Contact === formData.reference2Contact
     ) {
-      errors.loanAmount = "Loan amount is required.";
+      errors.reference2Contact = "Reference 2 contact cannot be same as Reference 1 contact.";
     }
 
+    if (!formData.loanAmount || formData.loanAmount < 5000 || formData.loanAmount > 5000000) {
+      errors.loanAmount = "Loan amount must be between ₹5,000 and ₹50,00,000.";
+    }
+    
+
     if (!formData.bankStatement1) errors.bankStatement1 = "Bank Statement is required.";
-
-
-
 
     return errors;
   }
@@ -894,7 +937,7 @@ export default function HomeLoanSalaried() {
 
 
                     </div>
-                    {renderError("pan")}
+                    {formData.pan ? "" : renderError("pan")}
                   </div>
                   <div>
                     <label
@@ -1366,7 +1409,7 @@ export default function HomeLoanSalaried() {
                       required
                     />
 
-                    {formData.loanAmount?" ": renderError("loanAmount")}
+                    {renderError("loanAmount")}
                   </div>
                 </div>
               </section>
@@ -1489,7 +1532,7 @@ export default function HomeLoanSalaried() {
                         </p>
                       )}
 
-                      {formData[doc.name]?" ": renderError(doc.name)}
+                      {formData[doc.name] ? " " : renderError(doc.name)}
                     </div>
 
                   ))}
@@ -2300,16 +2343,18 @@ export default function HomeLoanSalaried() {
 
                 <label className="block text-sm font-medium mb-2 text-gray-900">
                   Select one document to submit as address proof (e.g.,
-                  Lightbill, Wifi, Water, Gas Bill, or Rent Agreement)
+                  Lightbill, Wifi, Water, Gas Bill, or Rent Agreement) *
                 </label>
 
                 <input
                   type="file"
-                  name="addressProof" // <--- store in newAddressProofs
+                  name="newAddressProofs" // <--- store in newAddressProofs
                   onChange={handleFileChangeAddressProofs}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-teal-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-teal-500 file:text-white hover:file:bg-teal-600"
                 />
+
+                {formData.newAddressProofs ? "" : renderError("newAddressProofs")}   {/* <-- KEEP ONLY THIS */}
 
                 {formData.newAddressProofs && (
                   <div className="mt-2 text-sm text-gray-700">
@@ -2324,6 +2369,7 @@ export default function HomeLoanSalaried() {
                     )}
                   </div>
                 )}
+
               </section>
 
               {/* References */}

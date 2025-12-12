@@ -127,13 +127,27 @@ export default function HomeLoanSelfEmployee() {
   //     }));
   //   };
 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
+  
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "loanAmount" ? parseInt(value, 10) || 0 : value,
+      [name]:
+        name === "loanAmount"
+          ? value === ""      // if empty, keep empty string
+            ? ""
+            : parseInt(value, 10)
+          : value,
     }));
+  
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -247,16 +261,36 @@ export default function HomeLoanSelfEmployee() {
       errors.phone = "Phone number must be 10 digits.";
     }
 
-    if (!formData.email) errors.email = "Email is required.";
-    if (!formData.panNumber) errors.panNumber = "Pan Card Number is required."
+    if (!formData.email) {
+      errors.email = "Email is required.";
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      errors.email = "Invalid email format.";
+    }
+    // if (!formData.panNumber) errors.panNumber = "Pan Card Number is required."
 
+    if (!formData.panNumber) {
+      errors.panNumber = "PAN Card Number is required";
+    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.toUpperCase())) {
+      errors.panNumber = "Enter a valid PAN Card number (e.g., ABCDE1234F)";
+    }
 
 
     // Current address
     if (!formData.currentAddress)
       errors.currentAddress = "Current address is required.";
-    if (!formData.currentAddressPincode)
-      errors.currentAddressPincode = "Pincode is required.";
+
+    // if (!formData.currentAddressPincode)
+    //   errors.currentAddressPincode = "Pincode is required.";
+
+    const pin = formData.currentAddressPincode?.trim();
+
+    if (!pin) {
+      errors.currentAddressPincode = "Current Address Pin is required.";
+    } else if (!/^[1-9][0-9]{5}$/.test(pin)) {
+      errors.currentAddressPincode = "Enter a valid 6-digit PIN code.";
+    }
+
+
     if (!formData.currentAddressOwnRented)
       errors.currentAddressOwnRented = "Ownership status is required.";
     if (!formData.currentAddressStability)
@@ -266,20 +300,28 @@ export default function HomeLoanSelfEmployee() {
     if (!sameAddress) {
       if (!formData.permanentAddress)
         errors.permanentAddress = "Permanent address is required.";
-      if (!formData.permanentAddressPincode)
-        errors.permanentAddressPincode = "Pincode is required.";
+
+      // if (!formData.permanentAddressPincode)
+      //   errors.permanentAddressPincode = "Pincode is required.";
+
+      const permanentPin = formData.permanentAddressPincode?.trim();
+
+      if (!permanentPin) {
+        errors.permanentAddressPincode = "Permanent Address Pin is required.";
+      } else if (!/^[1-9][0-9]{5}$/.test(permanentPin)) {
+        errors.permanentAddressPincode = "Enter a valid 6-digit PIN code.";
+      }
+
+
       if (!formData.permanentAddressOwnRented)
         errors.permanentAddressOwnRented = "Ownership status is required.";
       if (!formData.permanentAddressStability)
         errors.permanentAddressStability = "Stability is required.";
     }
 
-    if (
-      formData.loanAmount === "" ||
-      formData.loanAmount === null ||
-      formData.loanAmount === undefined
-    ) {
-      errors.loanAmount = "Loan amount is required.";
+
+    if (!formData.loanAmount || formData.loanAmount < 5000 || formData.loanAmount > 10000000) {
+      errors.loanAmount = "Loan amount must be between ₹5,000 and ₹1,00,00,000.";
     }
 
 
@@ -323,21 +365,32 @@ export default function HomeLoanSelfEmployee() {
         errors.coApplicantSelfie = "Co-applicant selfie is required.";
     }
 
-    // References
-    if (!formData.reference1Name)
+     // Reference 1
+     if (!formData.reference1Name)
       errors.reference1Name = "Reference 1 name is required.";
-    if (!formData.reference1Contact)
+
+    if (!formData.reference1Contact) {
       errors.reference1Contact = "Reference 1 contact is required.";
-    else if (!/^\d{10}$/.test(formData.reference1Contact)) {
-      errors.reference1Contact = "Reference 1 contact must be 10 digits.";
+    } else if (!/^\d{10}$/.test(formData.reference1Contact)) {
+      errors.reference1Contact = "Reference 1 contact must be exactly 10 digits.";
     }
 
+    // Reference 2
     if (!formData.reference2Name)
       errors.reference2Name = "Reference 2 name is required.";
-    if (!formData.reference2Contact)
+
+    if (!formData.reference2Contact) {
       errors.reference2Contact = "Reference 2 contact is required.";
-    else if (!/^\d{10}$/.test(formData.reference2Contact)) {
-      errors.reference2Contact = "Reference 2 contact must be 10 digits.";
+    } else if (!/^\d{10}$/.test(formData.reference2Contact)) {
+      errors.reference2Contact = "Reference 2 contact must be exactly 10 digits.";
+    }
+
+    if (
+      formData.reference1Contact &&
+      formData.reference2Contact &&
+      formData.reference1Contact === formData.reference2Contact
+    ) {
+      errors.reference2Contact = "Reference 2 contact cannot be same as Reference 1 contact.";
     }
 
 
@@ -861,7 +914,7 @@ export default function HomeLoanSelfEmployee() {
                     required
                   />
 
-                  {formData.panNumber ? "" : renderError('panNumber')}
+                  {renderError('panNumber')}
                 </div>
                 {/* Gender */}
                 <div>
@@ -1002,7 +1055,7 @@ export default function HomeLoanSelfEmployee() {
                       required
                     />
 
-                    {formData.email ? "" : renderError("email")}
+                    {renderError("email")}
                   </div>
                 </div>
                 {/* Referral moved to end */}
@@ -1104,7 +1157,7 @@ export default function HomeLoanSelfEmployee() {
                         required
                       />
 
-                      {formData.currentAddressPincode ? "" : renderError('currentAddressPincode')}
+                      {renderError('currentAddressPincode')}
                     </div>
                     <div>
                       <label
@@ -1254,7 +1307,7 @@ export default function HomeLoanSelfEmployee() {
                         required
                       />
 
-                      {formData.permanentAddressPincode ? "" : renderError('permanentAddressPincode')}
+                      {renderError('permanentAddressPincode')}
                     </div>
                     <div>
                       <label
@@ -1365,11 +1418,11 @@ export default function HomeLoanSelfEmployee() {
                       backgroundColor: "#F8FAFC",
                     }}
                     placeholder="Enter loan amount"
-                    min="0"
+                    // min="0"
                     required
                   />
 
-                  {formData.loanAmount ? "" : renderError('loanAmount')}
+                  {renderError('loanAmount')}
                 </div>
               </div>
             </section>
@@ -1733,6 +1786,7 @@ export default function HomeLoanSelfEmployee() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+                      {renderError('coApplicantAadharFront')}
                     </div>
                     <div>
                       <label
@@ -1753,6 +1807,8 @@ export default function HomeLoanSelfEmployee() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+
+                      {renderError('coApplicantAadharBack')}
                     </div>
                     <div>
                       <label
@@ -1773,6 +1829,8 @@ export default function HomeLoanSelfEmployee() {
                         accept=".pdf,.jpg,.jpeg,.png"
                         required
                       />
+
+                      {renderError('coApplicantPan')}
                     </div>
                     <div>
                       <label
@@ -1799,6 +1857,8 @@ export default function HomeLoanSelfEmployee() {
                           placeholder="Enter co-applicant mobile number"
                           required
                         />
+
+                        {renderError('coApplicantMobile')}
                       </div>
                     </div>
                     <div>
@@ -1820,6 +1880,7 @@ export default function HomeLoanSelfEmployee() {
                         accept=".jpg,.jpeg,.png"
                         required
                       />
+                      {renderError('coApplicantSelfie')}
                     </div>
                   </div>
                 </div>
@@ -2266,7 +2327,7 @@ export default function HomeLoanSelfEmployee() {
                           required
                         />
 
-                        {formData.reference1Contact ? "" : renderError('reference1Contact')}
+                        {renderError('reference1Contact')}
                       </div>
                     </div>
                   </div>
@@ -2331,7 +2392,7 @@ export default function HomeLoanSelfEmployee() {
                           required
                         />
 
-                        {formData.reference2Contact ? " " : renderError('reference2Contact')}
+                        {renderError('reference2Contact')}
                       </div>
                     </div>
                   </div>
